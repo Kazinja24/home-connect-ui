@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,8 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const mockProperties = [
-  { id: "1", title: "Modern Studio in Masaki", price: 800000, location: "Masaki", bedrooms: 1 },
-  { id: "2", title: "Spacious 2BR in Mikocheni", price: 1200000, location: "Mikocheni", bedrooms: 2 },
+  { id: "1", title: "Studio ya Kisasa Masaki", price: 800000, location: "Masaki", bedrooms: 1 },
+  { id: "2", title: "Nyumba 2BR Mikocheni", price: 1200000, location: "Mikocheni", bedrooms: 2 },
 ];
 
 const LandlordProperties = () => {
@@ -20,53 +20,52 @@ const LandlordProperties = () => {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    // API placeholder
-    toast({ title: "Property saved!" });
+    toast({ title: "Nyumba imehifadhiwa!" });
     setDialogOpen(false);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">My Properties</h1>
+        <h1 className="text-2xl font-bold text-foreground">Nyumba Zangu</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />Add Property</Button>
+            <Button className="shadow-md"><Plus className="h-4 w-4 mr-2" />Ongeza Nyumba</Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>Add Property</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Ongeza Nyumba</DialogTitle></DialogHeader>
             <form onSubmit={handleSave} className="space-y-4">
-              <div className="space-y-2"><Label>Title</Label><Input placeholder="Property title" /></div>
-              <div className="space-y-2"><Label>Description</Label><Textarea placeholder="Describe the property…" /></div>
+              <div className="space-y-2"><Label>Kichwa</Label><Input placeholder="Jina la nyumba" /></div>
+              <div className="space-y-2"><Label>Maelezo</Label><Textarea placeholder="Eleza nyumba…" /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Price (TZS/mo)</Label><Input type="number" placeholder="800000" /></div>
-                <div className="space-y-2"><Label>Bedrooms</Label><Input type="number" placeholder="2" /></div>
+                <div className="space-y-2"><Label>Bei (TZS/mwezi)</Label><Input type="number" placeholder="800000" /></div>
+                <div className="space-y-2"><Label>Vyumba vya Kulala</Label><Input type="number" placeholder="2" /></div>
               </div>
-              <div className="space-y-2"><Label>Location</Label><Input placeholder="Area, City" /></div>
-              <div className="space-y-2"><Label>Amenities (comma separated)</Label><Input placeholder="WiFi, Parking, Security" /></div>
-              <div className="space-y-2"><Label>House Rules (comma separated)</Label><Input placeholder="No pets, No smoking" /></div>
-              <div className="space-y-2"><Label>Images</Label><Input type="file" multiple accept="image/*" /></div>
-              <Button type="submit" className="w-full">Save Property</Button>
+              <div className="space-y-2"><Label>Eneo</Label><Input placeholder="Eneo, Jiji" /></div>
+              <div className="space-y-2"><Label>Vifaa (tenganisha kwa koma)</Label><Input placeholder="WiFi, Parking, Ulinzi" /></div>
+              <div className="space-y-2"><Label>Sheria za Nyumba (tenganisha kwa koma)</Label><Input placeholder="Hakuna wanyama, Hakuna kuvuta" /></div>
+              <div className="space-y-2"><Label>Picha</Label><Input type="file" multiple accept="image/*" /></div>
+              <Button type="submit" className="w-full font-semibold">Hifadhi Nyumba</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <Card>
+      <Card className="glass-strong border-border/30">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Beds</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>Kichwa</TableHead>
+                <TableHead>Eneo</TableHead>
+                <TableHead>Bei</TableHead>
+                <TableHead>Vyumba</TableHead>
+                <TableHead className="text-right">Vitendo</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {mockProperties.map((p) => (
-                <TableRow key={p.id}>
+                <TableRow key={p.id} className="hover:bg-muted/50 transition-colors">
                   <TableCell className="font-medium">{p.title}</TableCell>
                   <TableCell>{p.location}</TableCell>
                   <TableCell>TZS {p.price.toLocaleString()}</TableCell>

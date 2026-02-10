@@ -13,35 +13,35 @@ const LandlordLeases = () => {
 
   const handlePublish = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: "Lease published!" });
+    toast({ title: "Mkataba umechapishwa!" });
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Lease Creator</h1>
-      <Card>
-        <CardHeader><CardTitle className="text-lg">Generate Lease Agreement</CardTitle></CardHeader>
+    <div className="space-y-6 animate-slide-up">
+      <h1 className="text-2xl font-bold text-foreground">Tengeneza Mkataba</h1>
+      <Card className="glass-strong border-border/30">
+        <CardHeader><CardTitle className="text-lg">Tengeneza Mkataba wa Kukodisha</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handlePublish} className="space-y-4">
             <div className="space-y-2">
-              <Label>Property</Label>
+              <Label>Nyumba</Label>
               <Select value={property} onValueChange={setProperty}>
-                <SelectTrigger><SelectValue placeholder="Select property" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Chagua nyumba" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">Modern Studio in Masaki</SelectItem>
-                  <SelectItem value="2">Spacious 2BR in Mikocheni</SelectItem>
+                  <SelectItem value="1">Studio ya Kisasa Masaki</SelectItem>
+                  <SelectItem value="2">Nyumba 2BR Mikocheni</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>House Rules</Label>
-              <Textarea placeholder="List house rules…" />
+              <Label>Sheria za Nyumba</Label>
+              <Textarea placeholder="Orodhesha sheria za nyumba…" />
             </div>
             <div className="space-y-2">
-              <Label>Special Conditions</Label>
-              <Textarea placeholder="Any special conditions or clauses…" />
+              <Label>Masharti Maalum</Label>
+              <Textarea placeholder="Masharti maalum yoyote…" />
             </div>
-            <Button type="submit">Publish Lease</Button>
+            <Button type="submit" className="font-semibold shadow-md">Chapisha Mkataba</Button>
           </form>
         </CardContent>
       </Card>

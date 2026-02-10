@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { ViewingRequest, Application, LeaseAgreement } from "@/types";
 
-// Placeholder data — API-ready
 const mockViewings: ViewingRequest[] = [
   { id: "v1", propertyId: "1", tenantId: "t1", date: "2026-02-15", timeWindow: "morning", status: "pending" },
   { id: "v2", propertyId: "2", tenantId: "t1", date: "2026-02-10", timeWindow: "afternoon", status: "approved" },
@@ -13,45 +12,45 @@ const mockViewings: ViewingRequest[] = [
 ];
 
 const mockApplications: Application[] = [
-  { id: "a1", propertyId: "1", tenantId: "t1", employmentStatus: "Employed", lengthOfStay: "12 months", occupants: 1, status: "pending" },
-  { id: "a2", propertyId: "2", tenantId: "t1", employmentStatus: "Self-employed", lengthOfStay: "6 months", occupants: 2, status: "approved" },
+  { id: "a1", propertyId: "1", tenantId: "t1", employmentStatus: "Ameajiriwa", lengthOfStay: "Miezi 12", occupants: 1, status: "pending" },
+  { id: "a2", propertyId: "2", tenantId: "t1", employmentStatus: "Biashara binafsi", lengthOfStay: "Miezi 6", occupants: 2, status: "approved" },
 ];
 
 const mockLeases: LeaseAgreement[] = [
-  { id: "le1", propertyId: "2", tenantId: "t1", landlordId: "l2", houseRules: ["No pets"], specialConditions: "Rent due by 5th of each month.", acknowledged: false },
+  { id: "le1", propertyId: "2", tenantId: "t1", landlordId: "l2", houseRules: ["Hakuna wanyama"], specialConditions: "Kodi hulipwa kabla ya tarehe 5 kila mwezi.", acknowledged: false },
 ];
 
 const TenantDashboard = () => {
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">My Dashboard</h1>
+    <div className="space-y-6 animate-slide-up">
+      <h1 className="text-2xl font-bold text-foreground">Dashibodi Yangu</h1>
 
       <Tabs defaultValue="viewings">
-        <TabsList>
-          <TabsTrigger value="viewings">My Viewings</TabsTrigger>
-          <TabsTrigger value="applications">My Applications</TabsTrigger>
-          <TabsTrigger value="leases">Lease Agreements</TabsTrigger>
+        <TabsList className="bg-muted/60">
+          <TabsTrigger value="viewings">Maombi ya Kuona</TabsTrigger>
+          <TabsTrigger value="applications">Maombi Yangu</TabsTrigger>
+          <TabsTrigger value="leases">Mikataba</TabsTrigger>
         </TabsList>
 
         <TabsContent value="viewings" className="mt-4">
-          <Card>
-            <CardHeader><CardTitle className="text-lg">Viewing Requests</CardTitle></CardHeader>
+          <Card className="glass-strong border-border/30">
+            <CardHeader><CardTitle className="text-lg">Maombi ya Kuona Nyumba</CardTitle></CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Property</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Nyumba</TableHead>
+                    <TableHead>Tarehe</TableHead>
+                    <TableHead>Muda</TableHead>
+                    <TableHead>Hali</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {mockViewings.map((v) => (
-                    <TableRow key={v.id}>
-                      <TableCell className="font-medium">Property #{v.propertyId}</TableCell>
+                    <TableRow key={v.id} className="hover:bg-muted/50 transition-colors">
+                      <TableCell className="font-medium">Nyumba #{v.propertyId}</TableCell>
                       <TableCell>{v.date}</TableCell>
-                      <TableCell className="capitalize">{v.timeWindow}</TableCell>
+                      <TableCell className="capitalize">{v.timeWindow === "morning" ? "Asubuhi" : v.timeWindow === "afternoon" ? "Mchana" : "Jioni"}</TableCell>
                       <TableCell><StatusBadge status={v.status} /></TableCell>
                     </TableRow>
                   ))}
@@ -62,22 +61,22 @@ const TenantDashboard = () => {
         </TabsContent>
 
         <TabsContent value="applications" className="mt-4">
-          <Card>
-            <CardHeader><CardTitle className="text-lg">My Applications</CardTitle></CardHeader>
+          <Card className="glass-strong border-border/30">
+            <CardHeader><CardTitle className="text-lg">Maombi Yangu</CardTitle></CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Property</TableHead>
-                    <TableHead>Employment</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Nyumba</TableHead>
+                    <TableHead>Ajira</TableHead>
+                    <TableHead>Muda</TableHead>
+                    <TableHead>Hali</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {mockApplications.map((a) => (
-                    <TableRow key={a.id}>
-                      <TableCell className="font-medium">Property #{a.propertyId}</TableCell>
+                    <TableRow key={a.id} className="hover:bg-muted/50 transition-colors">
+                      <TableCell className="font-medium">Nyumba #{a.propertyId}</TableCell>
                       <TableCell>{a.employmentStatus}</TableCell>
                       <TableCell>{a.lengthOfStay}</TableCell>
                       <TableCell><StatusBadge status={a.status} /></TableCell>
@@ -90,22 +89,22 @@ const TenantDashboard = () => {
         </TabsContent>
 
         <TabsContent value="leases" className="mt-4">
-          <Card>
-            <CardHeader><CardTitle className="text-lg">Lease Agreements</CardTitle></CardHeader>
+          <Card className="glass-strong border-border/30">
+            <CardHeader><CardTitle className="text-lg">Mikataba ya Kukodisha</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               {mockLeases.map((l) => (
-                <div key={l.id} className="border rounded-lg p-4 space-y-3">
+                <div key={l.id} className="border rounded-xl p-5 space-y-3 hover:bg-muted/30 transition-colors">
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-foreground">Property #{l.propertyId}</p>
+                    <p className="font-semibold text-foreground">Nyumba #{l.propertyId}</p>
                     <StatusBadge status={l.acknowledged ? "approved" : "pending"} />
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    <p><strong>Rules:</strong> {l.houseRules.join(", ")}</p>
-                    <p><strong>Conditions:</strong> {l.specialConditions}</p>
+                    <p><strong>Sheria:</strong> {l.houseRules.join(", ")}</p>
+                    <p><strong>Masharti:</strong> {l.specialConditions}</p>
                   </div>
                   {!l.acknowledged && (
-                    <Button size="sm" onClick={() => { /* API call */ }}>
-                      Acknowledge Agreement
+                    <Button size="sm" className="font-semibold shadow-sm" onClick={() => {}}>
+                      Kubali Mkataba
                     </Button>
                   )}
                 </div>
