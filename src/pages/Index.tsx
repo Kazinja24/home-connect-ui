@@ -8,10 +8,10 @@ import type { Property } from "@/types";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const featuredProperties: Property[] = [
-  { id: "1", title: "Studio ya Kisasa Masaki", description: "", price: 800000, location: "Masaki, Dar es Salaam", bedrooms: 1, propertyType: "studio", amenities: [], houseRules: [], images: ["/placeholder.svg"], available: true, landlordId: "l1" },
-  { id: "2", title: "Nyumba 2BR Mikocheni", description: "", price: 1200000, location: "Mikocheni, Dar es Salaam", bedrooms: 2, propertyType: "apartment", amenities: [], houseRules: [], images: ["/placeholder.svg"], available: true, landlordId: "l2" },
-  { id: "3", title: "Chumba Sinza", description: "", price: 500000, location: "Sinza, Dar es Salaam", bedrooms: 1, propertyType: "apartment", amenities: [], houseRules: [], images: ["/placeholder.svg"], available: true, landlordId: "l3" },
-  { id: "4", title: "Nyumba ya Familia Mbezi", description: "", price: 2000000, location: "Mbezi Beach", bedrooms: 3, propertyType: "house", amenities: [], houseRules: [], images: ["/placeholder.svg"], available: true, landlordId: "l4" },
+  { id: "1", title: "Studio ya Kisasa Masaki", description: "", price: 800000, location: "Masaki, Dar es Salaam", bedrooms: 1, propertyType: "studio", amenities: [], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l1", created_at: "" },
+  { id: "2", title: "Nyumba 2BR Mikocheni", description: "", price: 1200000, location: "Mikocheni, Dar es Salaam", bedrooms: 2, propertyType: "apartment", amenities: [], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l2", created_at: "" },
+  { id: "3", title: "Chumba Sinza", description: "", price: 500000, location: "Sinza, Dar es Salaam", bedrooms: 1, propertyType: "apartment", amenities: [], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l3", created_at: "" },
+  { id: "4", title: "Nyumba ya Familia Mbezi", description: "", price: 2000000, location: "Mbezi Beach", bedrooms: 3, propertyType: "house", amenities: [], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l4", created_at: "" },
 ];
 
 const steps = [

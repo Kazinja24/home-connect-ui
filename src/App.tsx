@@ -16,11 +16,13 @@ import PropertyDetails from "./pages/PropertyDetails";
 import NotFound from "./pages/NotFound";
 
 import TenantViewings from "./pages/tenant/TenantViewings";
+import TenantPayments from "./pages/tenant/TenantPayments";
 import LandlordOverview from "./pages/landlord/LandlordOverview";
 import LandlordProperties from "./pages/landlord/LandlordProperties";
 import LandlordViewings from "./pages/landlord/LandlordViewings";
 import LandlordApplications from "./pages/landlord/LandlordApplications";
 import LandlordLeases from "./pages/landlord/LandlordLeases";
+import LandlordPayments from "./pages/landlord/LandlordPayments";
 import AdminOverview from "./pages/admin/AdminOverview";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminProperties from "./pages/admin/AdminProperties";
@@ -58,24 +60,15 @@ const App = () => (
               <Route path="viewings" element={<TenantViewings />} />
               <Route path="applications" element={<TenantViewings />} />
               <Route path="leases" element={<TenantViewings />} />
+              <Route path="payments" element={<TenantPayments />} />
               {/* Landlord */}
               <Route path="overview" element={<LandlordOverview />} />
               <Route path="properties" element={<LandlordProperties />} />
               <Route path="properties/new" element={<LandlordProperties />} />
-            </Route>
-
-            {/* Landlord-specific reuse of dashboard viewings/applications/leases */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["landlord"]}>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
               <Route path="landlord-viewings" element={<LandlordViewings />} />
               <Route path="landlord-applications" element={<LandlordApplications />} />
               <Route path="landlord-leases" element={<LandlordLeases />} />
+              <Route path="landlord-payments" element={<LandlordPayments />} />
             </Route>
 
             {/* Admin */}

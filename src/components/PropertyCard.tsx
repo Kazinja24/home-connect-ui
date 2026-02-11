@@ -14,7 +14,7 @@ export function PropertyCard({ property }: { property: Property }) {
           className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        {property.available && (
+        {property.status === "available" && (
           <div className="absolute top-3 left-3 rounded-full bg-success/90 backdrop-blur-sm text-success-foreground text-xs font-semibold px-3 py-1 shadow-md">
             Inapatikana
           </div>

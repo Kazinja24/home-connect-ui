@@ -26,6 +26,7 @@ const Login = () => {
     setLoading(true);
     try {
       await login(email, password);
+      // Navigate based on role after login - auth context sets user
       navigate("/dashboard/viewings");
     } catch {
       toast({ title: "Kuingia kumeshindikana", variant: "destructive" });
