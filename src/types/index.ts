@@ -19,8 +19,9 @@ export interface Property {
   amenities: string[];
   houseRules: string[];
   images: string[];
-  available: boolean;
-  landlordId: string;
+  status: string; // "available" | "occupied" | "maintenance" etc.
+  owner: string; // user ID of landlord
+  created_at: string;
 }
 
 export interface ViewingRequest {
@@ -30,6 +31,7 @@ export interface ViewingRequest {
   date: string;
   timeWindow: "morning" | "afternoon" | "evening";
   status: "pending" | "approved" | "rejected";
+  created_at: string;
 }
 
 export interface Application {
@@ -47,9 +49,22 @@ export interface LeaseAgreement {
   propertyId: string;
   tenantId: string;
   landlordId: string;
+  status: string; // "draft" | "active" | "signed" | "terminated"
   houseRules: string[];
   specialConditions: string;
-  acknowledged: boolean;
+  signed_at: string | null;
+  terminated_at: string | null;
+  created_at: string;
+}
+
+export interface Payment {
+  id: string;
+  propertyId: string;
+  tenantId: string;
+  amount: number;
+  status: "pending" | "completed" | "failed";
+  reference: string;
+  created_at: string;
 }
 
 export type RequestStatus = "pending" | "approved" | "rejected";

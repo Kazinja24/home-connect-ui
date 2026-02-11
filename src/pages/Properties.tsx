@@ -9,12 +9,12 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import type { Property } from "@/types";
 
 const mockProperties: Property[] = [
-  { id: "1", title: "Studio ya Kisasa Masaki", description: "Studio nzuri ya kisasa.", price: 800000, location: "Masaki, Dar es Salaam", bedrooms: 1, propertyType: "studio", amenities: ["WiFi", "Parking"], houseRules: [], images: ["/placeholder.svg"], available: true, landlordId: "l1" },
-  { id: "2", title: "Nyumba 2BR Mikocheni", description: "Nyumba pana ya vyumba viwili.", price: 1200000, location: "Mikocheni, Dar es Salaam", bedrooms: 2, propertyType: "apartment", amenities: ["WiFi", "Ulinzi"], houseRules: [], images: ["/placeholder.svg"], available: true, landlordId: "l2" },
-  { id: "3", title: "Chumba Sinza", description: "Bei nafuu na starehe.", price: 500000, location: "Sinza, Dar es Salaam", bedrooms: 1, propertyType: "apartment", amenities: ["Maji"], houseRules: [], images: ["/placeholder.svg"], available: true, landlordId: "l3" },
-  { id: "4", title: "Nyumba ya Familia Mbezi", description: "Nyumba kubwa ya familia.", price: 2000000, location: "Mbezi Beach", bedrooms: 3, propertyType: "house", amenities: ["Bustani", "Parking", "WiFi"], houseRules: [], images: ["/placeholder.svg"], available: true, landlordId: "l4" },
-  { id: "5", title: "Penthouse Oyster Bay", description: "Penthouse ya kifahari.", price: 3500000, location: "Oyster Bay", bedrooms: 3, propertyType: "apartment", amenities: ["Bwawa", "Gym", "WiFi"], houseRules: [], images: ["/placeholder.svg"], available: true, landlordId: "l5" },
-  { id: "6", title: "Chumba Kinondoni", description: "Chumba kimoja bei nafuu.", price: 250000, location: "Kinondoni", bedrooms: 1, propertyType: "room", amenities: [], houseRules: [], images: ["/placeholder.svg"], available: true, landlordId: "l6" },
+  { id: "1", title: "Studio ya Kisasa Masaki", description: "Studio nzuri ya kisasa.", price: 800000, location: "Masaki, Dar es Salaam", bedrooms: 1, propertyType: "studio", amenities: ["WiFi", "Parking"], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l1", created_at: "" },
+  { id: "2", title: "Nyumba 2BR Mikocheni", description: "Nyumba pana ya vyumba viwili.", price: 1200000, location: "Mikocheni, Dar es Salaam", bedrooms: 2, propertyType: "apartment", amenities: ["WiFi", "Ulinzi"], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l2", created_at: "" },
+  { id: "3", title: "Chumba Sinza", description: "Bei nafuu na starehe.", price: 500000, location: "Sinza, Dar es Salaam", bedrooms: 1, propertyType: "apartment", amenities: ["Maji"], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l3", created_at: "" },
+  { id: "4", title: "Nyumba ya Familia Mbezi", description: "Nyumba kubwa ya familia.", price: 2000000, location: "Mbezi Beach", bedrooms: 3, propertyType: "house", amenities: ["Bustani", "Parking", "WiFi"], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l4", created_at: "" },
+  { id: "5", title: "Penthouse Oyster Bay", description: "Penthouse ya kifahari.", price: 3500000, location: "Oyster Bay", bedrooms: 3, propertyType: "apartment", amenities: ["Bwawa", "Gym", "WiFi"], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l5", created_at: "" },
+  { id: "6", title: "Chumba Kinondoni", description: "Chumba kimoja bei nafuu.", price: 250000, location: "Kinondoni", bedrooms: 1, propertyType: "room", amenities: [], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l6", created_at: "" },
 ];
 
 const Properties = () => {

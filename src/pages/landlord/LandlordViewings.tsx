@@ -1,53 +1,73 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/StatusBadge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { viewings as viewingsApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-
-const mockViewings = [
-  { id: "v1", tenantName: "Alice Mbeki", property: "Studio ya Kisasa Masaki", date: "2026-02-15", time: "Asubuhi", status: "pending" as const },
-  { id: "v2", tenantName: "Bob Kamara", property: "Nyumba 2BR Mikocheni", date: "2026-02-18", time: "Mchana", status: "pending" as const },
-];
+import type { RequestStatus } from "@/types";
 
 const LandlordViewings = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const handleAction = (id: string, action: "approved" | "rejected") => {
-    toast({ title: `Ombi la kuona ${action === "approved" ? "limekubaliwa" : "limekataliwa"}` });
-  };
+  const { data, isLoading } = useQuery({
+    queryKey: ["landlord-viewings"],
+    queryFn: viewingsApi.list,
+  });
+
+  const mutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => viewingsApi.updateStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["landlord-viewings"] });
+      toast({ title: "Hali imesasishwa!" });
+    },
+    onError: (err: any) => toast({ title: err.message || "Imeshindikana", variant: "destructive" }),
+  });
 
   return (
     <div className="space-y-6 animate-slide-up">
       <h1 className="text-2xl font-bold text-foreground">Maombi ya Kuona</h1>
       <Card className="glass-strong border-border/30">
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Mpangaji</TableHead>
-                <TableHead>Nyumba</TableHead>
-                <TableHead>Tarehe</TableHead>
-                <TableHead>Muda</TableHead>
-                <TableHead>Hali</TableHead>
-                <TableHead className="text-right">Vitendo</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockViewings.map((v) => (
-                <TableRow key={v.id} className="hover:bg-muted/50 transition-colors">
-                  <TableCell className="font-medium">{v.tenantName}</TableCell>
-                  <TableCell>{v.property}</TableCell>
-                  <TableCell>{v.date}</TableCell>
-                  <TableCell>{v.time}</TableCell>
-                  <TableCell><StatusBadge status={v.status} /></TableCell>
-                  <TableCell className="text-right space-x-1">
-                    <Button size="sm" variant="outline" onClick={() => handleAction(v.id, "approved")}>Kubali</Button>
-                    <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleAction(v.id, "rejected")}>Kataa</Button>
-                  </TableCell>
+          {isLoading ? (
+            <div className="p-6 space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-12 w-full" />)}</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Mpangaji</TableHead>
+                  <TableHead>Nyumba</TableHead>
+                  <TableHead>Tarehe</TableHead>
+                  <TableHead>Muda</TableHead>
+                  <TableHead>Hali</TableHead>
+                  <TableHead className="text-right">Vitendo</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {data && data.length > 0 ? data.map((v: any) => (
+                  <TableRow key={v.id} className="hover:bg-muted/50 transition-colors">
+                    <TableCell className="font-medium">{v.tenant_name || `Mpangaji #${v.tenant || v.tenantId}`}</TableCell>
+                    <TableCell>{v.property_title || `Nyumba #${v.property || v.propertyId}`}</TableCell>
+                    <TableCell>{v.date}</TableCell>
+                    <TableCell>{v.time_window === "morning" ? "Asubuhi" : v.time_window === "afternoon" ? "Mchana" : "Jioni"}</TableCell>
+                    <TableCell><StatusBadge status={v.status as RequestStatus} /></TableCell>
+                    <TableCell className="text-right space-x-1">
+                      {v.status === "pending" && (
+                        <>
+                          <Button size="sm" variant="outline" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: v.id, status: "approved" })}>Kubali</Button>
+                          <Button size="sm" variant="ghost" className="text-destructive" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: v.id, status: "rejected" })}>Kataa</Button>
+                        </>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )) : (
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Hakuna maombi ya kuona</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

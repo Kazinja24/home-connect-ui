@@ -6,7 +6,7 @@ import {
   SidebarMenuButton, SidebarTrigger, SidebarInset, SidebarGroup, SidebarGroupLabel, SidebarGroupContent,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus } from "lucide-react";
+import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus, CreditCard, Wallet } from "lucide-react";
 import type { UserRole } from "@/types";
 
 const navItems: Record<UserRole, { title: string; url: string; icon: typeof Home }[]> = {
@@ -14,13 +14,15 @@ const navItems: Record<UserRole, { title: string; url: string; icon: typeof Home
     { title: "Maombi ya Kuona", url: "/dashboard/viewings", icon: Eye },
     { title: "Maombi Yangu", url: "/dashboard/applications", icon: ClipboardList },
     { title: "Mikataba", url: "/dashboard/leases", icon: FileText },
+    { title: "Malipo", url: "/dashboard/payments", icon: CreditCard },
   ],
   landlord: [
     { title: "Muhtasari", url: "/dashboard/overview", icon: Home },
     { title: "Nyumba", url: "/dashboard/properties", icon: Building2 },
-    { title: "Maombi ya Kuona", url: "/dashboard/viewings", icon: Eye },
-    { title: "Maombi", url: "/dashboard/applications", icon: ClipboardList },
-    { title: "Mkataba", url: "/dashboard/leases", icon: FileText },
+    { title: "Maombi ya Kuona", url: "/dashboard/landlord-viewings", icon: Eye },
+    { title: "Maombi", url: "/dashboard/landlord-applications", icon: ClipboardList },
+    { title: "Mkataba", url: "/dashboard/landlord-leases", icon: FileText },
+    { title: "Malipo", url: "/dashboard/landlord-payments", icon: Wallet },
   ],
   admin: [
     { title: "Muhtasari", url: "/admin/overview", icon: BarChart3 },
