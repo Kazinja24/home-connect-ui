@@ -1,85 +1,136 @@
 
 
-# NIKONEKTI — Rental Housing Platform Frontend
+# NIKONEKTI — API Integration & Missing Features Plan
 
-A clean, modern, mobile-responsive rental housing platform connecting Tenants, Landlords, and Admins. Built with a SaaS dashboard aesthetic inspired by Notion/Airbnb.
+## Summary
 
----
-
-## Phase 1: Foundation & Public Pages
-
-### App Layout & Routing
-- Set up role-based routing structure with protected route wrappers
-- Create a shared public layout (header with nav + footer) and authenticated dashboard layout with role-based sidebar navigation
-- Define placeholder auth context for role detection and redirects
-
-### Landing Page
-- **Hero section** with prominent search bar ("Search rooms, apartments, or areas…")
-- **How it Works** — 4-step visual flow: Discover → Request Viewing → Apply → Lease
-- **Featured Properties** — responsive grid of property cards (placeholder data, API-ready)
-- **Benefits section** — split view for Tenants & Landlords
-- **CTA section** — "Register as Tenant" / "Register as Landlord" buttons
-- **Footer** with navigation links
-
-### Authentication Pages
-- **Register page** with role selector (Tenant/Landlord), full name, phone, email, password, confirm password — with validation
-- **Login page** with email/password — redirects by role after login
-- Both pages are clean, centered card layouts
+Cross-referencing the Django backend serializers with the current frontend reveals that all UI pages exist but use **mock data with no real API calls**. There are also **type mismatches**, **missing features** (Payment, Property Edit/Delete), and a **missing backend model** (Application).
 
 ---
 
-## Phase 2: Property Discovery & Details
+## What Needs to Be Done
 
-### Property Discovery Page
-- **Filter sidebar/panel**: location input, property type dropdown, price range, bedrooms, availability toggle
-- **Property grid**: responsive cards showing image, title, price, location, bedrooms, and "View Details" button
-- Filters are wired to state, ready for API query params
+### 1. Create API Service Layer
 
-### Property Details Page
-- **Image gallery** with thumbnail navigation
-- **Property info**: description, amenities list, house rules
-- **Landlord preview card** (name, contact info — no chat)
-- **"Request Viewing" button** opening a modal with date picker and time window selector (Morning/Afternoon/Evening)
+Create a centralized API client (`src/lib/api.ts`) that handles:
+- Base URL configuration
+- JWT token storage and automatic attachment to requests
+- Response/error handling helpers
+- Organized endpoint functions for each resource (auth, properties, viewings, leases, payments)
+
+### 2. Fix Type Mismatches (align frontend types with backend)
+
+Update `src/types/index.ts` to match the Django models:
+
+- **Property**: rename `landlordId` to `owner`, replace `available: boolean` with `status: string`, add `created_at: string`
+- **ViewingRequest**: add `created_at: string`
+- **LeaseAgreement**: replace `acknowledged: boolean` with `status: string`, add `signed_at`, `terminated_at` fields, remove `houseRules`/`specialConditions` if not in backend
+- **Add Payment type**: `id`, `propertyId`, `tenantId`, `amount`, `status`, `reference`, plus any other fields from the backend model
+
+### 3. Wire Auth to Real API
+
+Update `AuthContext.tsx`:
+- `login()` calls `POST /api/auth/login/` and stores JWT token
+- `register()` calls `POST /api/auth/register/` with `email`, `password`, `full_name`, `role`
+- `logout()` clears stored token
+- Add token refresh logic placeholder
+- Role-based redirect uses actual role from API response (not hardcoded "tenant")
+
+### 4. Wire Property Features to API
+
+- **Discovery page**: fetch from `GET /api/properties/` with query params for filters
+- **Details page**: fetch from `GET /api/properties/:id/`
+- **Landlord - Add property**: `POST /api/properties/` (owner auto-set by backend)
+- **Landlord - Edit property**: add edit route + form, call `PUT /api/properties/:id/`
+- **Landlord - Delete property**: add delete confirmation dialog, call `DELETE /api/properties/:id/`
+- **Image upload**: add file upload component that posts to the backend
+
+### 5. Wire Viewing Features to API
+
+- **Tenant - Request viewing**: modal submits `POST /api/viewings/`
+- **Tenant - List viewings**: fetch from `GET /api/viewings/`
+- **Landlord - List viewings**: fetch from `GET /api/viewings/` (filtered by landlord's properties)
+- **Landlord - Approve/Reject**: `PATCH /api/viewings/:id/` with status update
+
+### 6. Wire Lease Features to API
+
+- **Landlord - Create lease**: form submits `POST /api/leases/`
+- **Tenant - View leases**: fetch from `GET /api/leases/`
+- **Tenant - Sign/Acknowledge**: `PATCH /api/leases/:id/` with signed status
+
+### 7. Add Payment Feature (NEW)
+
+This is entirely missing from the frontend but exists in the backend:
+- Add `Payment` type to `src/types/index.ts`
+- Create `src/pages/tenant/TenantPayments.tsx` — table showing payment history with status badges
+- Create `src/pages/landlord/LandlordPayments.tsx` — view payments received
+- Add payment routes to `App.tsx` and sidebar navigation in `DashboardLayout.tsx`
+- Wire to `GET /api/payments/` and `POST /api/payments/`
+
+### 8. Add Missing Property Management Actions (Edit & Delete)
+
+- **Edit**: Create a property edit form page at `/dashboard/properties/:id/edit`, pre-populated from API
+- **Delete**: Add delete button with confirmation dialog on the landlord properties table
+- Update `LandlordProperties.tsx` to include Edit/Delete action buttons per row
+
+### 9. Application Feature — Backend Gap
+
+The frontend has an Application feature (types, tenant tab, landlord review page) but **no backend serializer was provided**. Two options:
+- **Option A**: Keep the frontend Application UI as-is, ready for when a backend `ApplicationSerializer` is created
+- **Option B**: Remove Application from frontend until backend supports it
+
+Recommendation: Keep it as-is with mock data and a note that the backend endpoint is pending.
 
 ---
 
-## Phase 3: Tenant Dashboard
+## Technical Details
 
-A tabbed dashboard layout:
+### File Changes Summary
 
-1. **My Viewing Requests** — list/table with status badges (Pending / Approved / Rejected)
-2. **My Applications** — submitted applications with status tracking
-3. **Lease Agreements** — view lease details with "Acknowledge Agreement" button
+| File | Change |
+|---|---|
+| `src/lib/api.ts` | **NEW** — API client with auth headers, base URL, endpoint functions |
+| `src/types/index.ts` | **UPDATE** — Align types with backend; add `Payment` interface |
+| `src/contexts/AuthContext.tsx` | **UPDATE** — Real API calls for login/register, JWT token management |
+| `src/pages/Properties.tsx` | **UPDATE** — Fetch from API instead of mock data |
+| `src/pages/PropertyDetails.tsx` | **UPDATE** — Fetch from API, wire viewing request modal |
+| `src/pages/tenant/TenantViewings.tsx` | **UPDATE** — Fetch viewings, applications, leases from API |
+| `src/pages/tenant/TenantPayments.tsx` | **NEW** — Payment history page |
+| `src/pages/landlord/LandlordProperties.tsx` | **UPDATE** — Add Edit/Delete actions, wire CRUD to API |
+| `src/pages/landlord/LandlordViewings.tsx` | **UPDATE** — Wire approve/reject to API |
+| `src/pages/landlord/LandlordApplications.tsx` | **UPDATE** — Wire approve/reject to API |
+| `src/pages/landlord/LandlordLeases.tsx` | **UPDATE** — Wire form submit to API |
+| `src/pages/landlord/LandlordPayments.tsx` | **NEW** — Payments received page |
+| `src/components/layouts/DashboardLayout.tsx` | **UPDATE** — Add Payment nav items for tenant and landlord |
+| `src/App.tsx` | **UPDATE** — Add payment routes, property edit route |
 
----
+### API Client Structure (`src/lib/api.ts`)
 
-## Phase 4: Landlord Dashboard
+```text
+api.ts
+  +-- getToken() / setToken() / clearToken()
+  +-- apiClient (fetch wrapper with auth headers)
+  +-- auth.login(email, password)
+  +-- auth.register(email, password, full_name, role)
+  +-- properties.list(filters?)
+  +-- properties.get(id)
+  +-- properties.create(data)
+  +-- properties.update(id, data)
+  +-- properties.delete(id)
+  +-- viewings.list()
+  +-- viewings.create(data)
+  +-- viewings.updateStatus(id, status)
+  +-- leases.list()
+  +-- leases.create(data)
+  +-- leases.sign(id)
+  +-- payments.list()
+  +-- payments.create(data)
+```
 
-Sidebar-navigated dashboard with sections:
+### Notes
 
-1. **Overview** — stat cards for total properties, pending viewings, pending applications
-2. **Properties Management** — table listing properties with Add/Edit/Delete actions; property form with all fields including image upload
-3. **Viewing Requests** — list of tenant requests with Approve/Reject action buttons
-4. **Applications Review** — tenant application details (employment, length of stay, occupants) with Approve/Reject
-5. **Lease Creator** — form to generate lease with house rules, special conditions, and publish action
-
----
-
-## Phase 5: Admin Control Panel
-
-Sidebar-navigated admin panel:
-
-1. **Platform Overview** — dashboard cards: total users, landlords, tenants, active properties
-2. **User Management** — searchable user table with suspend action + reason modal
-3. **Property Oversight** — property table with flag/disable listing actions
-4. **Analytics** — application-to-agreement conversion metric display
-
----
-
-## Design System & Components
-
-- **Color palette**: Professional blues/neutrals with accent colors for CTAs and status badges
-- **Reusable components**: StatusBadge, PropertyCard, StatCard, DataTable, FilterPanel, FormModal, role-based Sidebar
-- **Mobile-first responsive** design across all pages
-- **All actions** (form submits, approve/reject, etc.) are wired as async API call placeholders with loading states and toast notifications
+- All API calls will use `@tanstack/react-query` for data fetching (already installed)
+- The base API URL will be configurable via environment variable
+- Error handling will show toast notifications using the existing `sonner` setup
+- Loading states will use skeleton components already available in the UI library
 
