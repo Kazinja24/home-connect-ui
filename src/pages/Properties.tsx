@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { PropertyCard } from "@/components/PropertyCard";
 import { Search, SlidersHorizontal } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 import type { Property } from "@/types";
 
 const mockProperties: Property[] = [
@@ -18,6 +18,7 @@ const mockProperties: Property[] = [
 ];
 
 const Properties = () => {
+  const { t } = useLanguage();
   const [location, setLocation] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [bedrooms, setBedrooms] = useState("");
@@ -32,47 +33,35 @@ const Properties = () => {
 
   return (
     <div className="container py-10">
-      {/* Page header */}
       <div className="mb-8 animate-slide-up">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Vinjari Nyumba</h1>
-        <p className="text-muted-foreground">Tafuta nyumba bora inayokufaa</p>
+        <h1 className="text-3xl font-bold text-foreground mb-2">{t("properties.title")}</h1>
+        <p className="text-muted-foreground">{t("properties.subtitle")}</p>
       </div>
-
-      {/* Search bar */}
       <div className="flex gap-2 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tafuta kwa eneo…"
-            className="pl-10 h-12"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
+          <Input placeholder={t("properties.searchPlaceholder")} className="pl-10 h-12" value={location} onChange={(e) => setLocation(e.target.value)} />
         </div>
-        <Button variant="outline" size="icon" className="h-12 w-12" onClick={() => setShowFilters(!showFilters)}>
-          <SlidersHorizontal className="h-4 w-4" />
-        </Button>
+        <Button variant="outline" size="icon" className="h-12 w-12" onClick={() => setShowFilters(!showFilters)}><SlidersHorizontal className="h-4 w-4" /></Button>
       </div>
-
-      {/* Filters */}
       {showFilters && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-5 border rounded-xl glass animate-slide-up">
           <div className="space-y-1.5">
-            <Label className="text-xs">Aina ya Nyumba</Label>
+            <Label className="text-xs">{t("properties.propertyType")}</Label>
             <Select value={propertyType} onValueChange={setPropertyType}>
-              <SelectTrigger><SelectValue placeholder="Aina zote" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("properties.allTypes")} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="studio">Studio</SelectItem>
-                <SelectItem value="apartment">Apartment</SelectItem>
-                <SelectItem value="house">Nyumba</SelectItem>
-                <SelectItem value="room">Chumba</SelectItem>
+                <SelectItem value="studio">{t("properties.studio")}</SelectItem>
+                <SelectItem value="apartment">{t("properties.apartment")}</SelectItem>
+                <SelectItem value="house">{t("properties.house")}</SelectItem>
+                <SelectItem value="room">{t("properties.room")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs">Vyumba vya Kulala</Label>
+            <Label className="text-xs">{t("properties.bedrooms")}</Label>
             <Select value={bedrooms} onValueChange={setBedrooms}>
-              <SelectTrigger><SelectValue placeholder="Vyote" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("properties.allBedrooms")} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="1">1</SelectItem>
                 <SelectItem value="2">2</SelectItem>
@@ -81,26 +70,18 @@ const Properties = () => {
             </Select>
           </div>
           <div className="col-span-2 flex items-end">
-            <Button variant="ghost" size="sm" onClick={() => { setPropertyType(""); setBedrooms(""); setLocation(""); }}>
-              Ondoa vichujio
-            </Button>
+            <Button variant="ghost" size="sm" onClick={() => { setPropertyType(""); setBedrooms(""); setLocation(""); }}>{t("properties.clearFilters")}</Button>
           </div>
         </div>
       )}
-
-      {/* Results */}
-      <p className="text-sm text-muted-foreground mb-4">Nyumba {filtered.length} zimepatikana</p>
+      <p className="text-sm text-muted-foreground mb-4">{t("properties.found", { count: String(filtered.length) })}</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
-        {filtered.map((p) => (
-          <div key={p.id} className="animate-slide-up">
-            <PropertyCard property={p} />
-          </div>
-        ))}
+        {filtered.map((p) => (<div key={p.id} className="animate-slide-up"><PropertyCard property={p} /></div>))}
       </div>
       {filtered.length === 0 && (
         <div className="text-center py-16 text-muted-foreground">
-          <p>Hakuna nyumba zinazolingana na vichujio vyako.</p>
-          <Button variant="link" onClick={() => { setPropertyType(""); setBedrooms(""); setLocation(""); }}>Ondoa vichujio vyote</Button>
+          <p>{t("properties.noResults")}</p>
+          <Button variant="link" onClick={() => { setPropertyType(""); setBedrooms(""); setLocation(""); }}>{t("properties.clearAll")}</Button>
         </div>
       )}
     </div>

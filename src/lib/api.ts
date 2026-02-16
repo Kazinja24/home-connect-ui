@@ -43,25 +43,24 @@ async function apiClient<T>(
   });
 
   if (res.status === 401) {
-    // Try refresh
     const refreshed = await tryRefreshToken();
     if (refreshed) {
       headers["Authorization"] = `Bearer ${getToken()}`;
       const retry = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
       if (!retry.ok) {
         const err = await retry.json().catch(() => ({}));
-        throw new Error(err.detail || err.message || "Ombi limeshindikana");
+        throw new Error(err.detail || err.message || "Request failed");
       }
       return retry.json();
     }
     clearToken();
     clearRefreshToken();
-    throw new Error("Kipindi chako kimeisha. Tafadhali ingia tena.");
+    throw new Error("Session expired. Please log in again.");
   }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    const message = err.detail || err.message || Object.values(err).flat().join(", ") || "Ombi limeshindikana";
+    const message = err.detail || err.message || Object.values(err).flat().join(", ") || "Request failed";
     throw new Error(message);
   }
 
@@ -102,7 +101,7 @@ async function apiUpload<T>(endpoint: string, formData: FormData): Promise<T> {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Kupakia kumeshindikana");
+    throw new Error(err.detail || "Upload failed");
   }
   return res.json();
 }
@@ -142,6 +141,18 @@ export const properties = {
     apiUpload<any>(`/properties/${id}/images/`, formData),
 };
 
+// ─── Application endpoints ──────────────────────────────────────
+export const applications = {
+  list: () => apiClient<any[]>("/applications/"),
+  create: (data: any) =>
+    apiClient<any>("/applications/", { method: "POST", body: JSON.stringify(data) }),
+  updateStatus: (id: string, status: string) =>
+    apiClient<any>(`/applications/${id}/`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  // Check if tenant has an approved application for a property
+  checkForProperty: (propertyId: string) =>
+    apiClient<any[]>(`/applications/?property=${propertyId}`),
+};
+
 // ─── Viewing endpoints ──────────────────────────────────────────
 export const viewings = {
   list: () => apiClient<any[]>("/viewings/"),
@@ -160,6 +171,15 @@ export const leases = {
     apiClient<any>(`/leases/${id}/`, { method: "PATCH", body: JSON.stringify({ status: "signed" }) }),
 };
 
+// ─── Invoice endpoints ──────────────────────────────────────────
+export const invoices = {
+  list: () => apiClient<any[]>("/invoices/"),
+  create: (data: { lease: string; amount: number; due_date: string; description?: string }) =>
+    apiClient<any>("/invoices/", { method: "POST", body: JSON.stringify(data) }),
+  pay: (id: string) =>
+    apiClient<any>(`/invoices/${id}/pay/`, { method: "POST" }),
+};
+
 // ─── Payment endpoints ──────────────────────────────────────────
 export const payments = {
   list: () => apiClient<any[]>("/payments/"),
@@ -167,11 +187,10 @@ export const payments = {
     apiClient<any>("/payments/", { method: "POST", body: JSON.stringify(data) }),
 };
 
-// ─── Application endpoints (backend pending) ────────────────────
-export const applications = {
-  list: () => apiClient<any[]>("/applications/"),
-  create: (data: any) =>
-    apiClient<any>("/applications/", { method: "POST", body: JSON.stringify(data) }),
-  updateStatus: (id: string, status: string) =>
-    apiClient<any>(`/applications/${id}/`, { method: "PATCH", body: JSON.stringify({ status }) }),
+// ─── Message endpoints ──────────────────────────────────────────
+export const messages = {
+  listByLease: (leaseId: string) => apiClient<any[]>(`/messages/?lease=${leaseId}`),
+  send: (data: { lease: string; content: string }) =>
+    apiClient<any>("/messages/", { method: "POST", body: JSON.stringify(data) }),
+  leaseConversations: () => apiClient<any[]>("/messages/conversations/"),
 };
