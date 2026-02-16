@@ -13,13 +13,21 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-function mapApiUser(apiUser: { id: number; email: string; full_name: string; role: string; phone?: string }): User {
+function mapRole(role: string): UserRole {
+  const normalized = role.toLowerCase();
+  if (normalized === "tenant" || normalized === "landlord" || normalized === "admin") {
+    return normalized;
+  }
+  return "tenant";
+}
+
+function mapApiUser(apiUser: { id: number | string; email: string; full_name: string; role: string; phone?: string }): User {
   return {
     id: String(apiUser.id),
     fullName: apiUser.full_name,
     email: apiUser.email,
     phone: apiUser.phone || "",
-    role: apiUser.role as UserRole,
+    role: mapRole(apiUser.role),
   };
 }
 
@@ -52,8 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: data.email,
       password: data.password,
       full_name: data.fullName,
-      phone: data.phone,
-      role: data.role,
+      role: data.role.toUpperCase(),
     });
     setToken(res.access);
     setRefreshToken(res.refresh);

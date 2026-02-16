@@ -48,7 +48,6 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Public */}
               <Route element={<PublicLayout />}>
                 <Route path="/" element={<Index />} />
                 <Route path="/properties" element={<Properties />} />
@@ -57,7 +56,6 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
-              {/* Tenant & Landlord Dashboard */}
               <Route
                 path="/dashboard"
                 element={
@@ -66,14 +64,13 @@ const App = () => (
                   </ProtectedRoute>
                 }
               >
-                {/* Tenant */}
                 <Route path="applications" element={<TenantApplications />} />
                 <Route path="viewings" element={<TenantViewings />} />
                 <Route path="leases" element={<TenantLeases />} />
                 <Route path="payments" element={<TenantPayments />} />
                 <Route path="invoices" element={<TenantInvoices />} />
                 <Route path="messages" element={<TenantMessages />} />
-                {/* Landlord */}
+
                 <Route path="overview" element={<LandlordOverview />} />
                 <Route path="properties" element={<LandlordProperties />} />
                 <Route path="properties/new" element={<LandlordProperties />} />
@@ -85,7 +82,6 @@ const App = () => (
                 <Route path="landlord-messages" element={<LandlordMessages />} />
               </Route>
 
-              {/* Admin */}
               <Route
                 path="/admin"
                 element={

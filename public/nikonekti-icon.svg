@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="NIKONEKTI Icon">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0A4D8C" />
+      <stop offset="100%" stop-color="#0E73C9" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="url(#g)" />
+  <path d="M14 35.5L32 20l18 15.5v14.5H37v-11h-10v11H14z" fill="#F8FAFC" />
+  <path d="M20 50V38h7v12" fill="#E2E8F0" />
+</svg>
