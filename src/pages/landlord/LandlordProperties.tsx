@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+
 import { properties as propertiesApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -18,7 +20,7 @@ const LandlordProperties = () => {
   const { t } = useLanguage();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", description: "", price: "", bedrooms: "", location: "", amenities: "", houseRules: "" });
+  const [form, setForm] = useState({ title: "", description: "", price: "", location: "" });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -28,7 +30,7 @@ const LandlordProperties = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => propertiesApi.create(data),
+    mutationFn: (data: { title: string; description: string; price: number; location: string }) => propertiesApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
       toast({ title: t("landlord.propertyAdded") });
@@ -38,7 +40,7 @@ const LandlordProperties = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => propertiesApi.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<{ title: string; description: string; price: number; location: string }> }) => propertiesApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
       toast({ title: t("landlord.propertyUpdated") });
@@ -57,7 +59,7 @@ const LandlordProperties = () => {
   });
 
   const resetForm = () => {
-    setForm({ title: "", description: "", price: "", bedrooms: "", location: "", amenities: "", houseRules: "" });
+    setForm({ title: "", description: "", price: "", location: "" });
     setEditId(null);
     setDialogOpen(false);
   };
@@ -68,30 +70,41 @@ const LandlordProperties = () => {
       title: p.title || "",
       description: p.description || "",
       price: String(p.price || ""),
-      bedrooms: String(p.bedrooms || ""),
       location: p.location || "",
-      amenities: (p.amenities || []).join(", "),
-      houseRules: (p.house_rules || p.houseRules || []).join(", "),
     });
     setDialogOpen(true);
   };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = {
-      title: form.title,
-      description: form.description,
-      price: Number(form.price),
-      bedrooms: Number(form.bedrooms),
-      location: form.location,
-      amenities: form.amenities.split(",").map(s => s.trim()).filter(Boolean),
-      house_rules: form.houseRules.split(",").map(s => s.trim()).filter(Boolean),
-    };
+
     if (editId) {
+      const payload: Partial<{ title: string; description: string; price: number; location: string }> = {};
+      if (form.title.trim()) payload.title = form.title.trim();
+      if (form.description.trim()) payload.description = form.description.trim();
+      if (form.location.trim()) payload.location = form.location.trim();
+      if (form.price !== "") payload.price = Number(form.price);
+
+      if (!Object.keys(payload).length) {
+        toast({ title: "Weka angalau field moja ya kusasisha.", variant: "destructive" });
+        return;
+      }
       updateMutation.mutate({ id: editId, data: payload });
-    } else {
-      createMutation.mutate(payload);
+      return;
     }
+
+    const createPayload = {
+      title: form.title.trim(),
+      description: form.description.trim(),
+      location: form.location.trim(),
+      price: Number(form.price),
+    };
+
+    if (!createPayload.title || !createPayload.description || !createPayload.location || Number.isNaN(createPayload.price)) {
+      toast({ title: "Jaza taarifa zote muhimu kabla ya kuhifadhi.", variant: "destructive" });
+      return;
+    }
+    createMutation.mutate(createPayload);
   };
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -111,14 +124,10 @@ const LandlordProperties = () => {
               <div className="space-y-2"><Label>{t("propertyDetails.description")}</Label><Textarea placeholder={t("landlord.describe")} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2"><Label>{t("landlord.priceLabel")}</Label><Input type="number" placeholder="800000" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} /></div>
-                <div className="space-y-2"><Label>{t("landlord.bedroomsLabel")}</Label><Input type="number" placeholder="2" value={form.bedrooms} onChange={e => setForm(f => ({ ...f, bedrooms: e.target.value }))} /></div>
+                <div className="space-y-2"><Label>{t("landlord.locationLabel")}</Label><Input placeholder={t("landlord.locationLabel")} value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} /></div>
               </div>
-              <div className="space-y-2"><Label>{t("landlord.locationLabel")}</Label><Input placeholder={t("landlord.locationLabel")} value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} /></div>
-              <div className="space-y-2"><Label>{t("landlord.amenitiesLabel")}</Label><Input placeholder="WiFi, Parking" value={form.amenities} onChange={e => setForm(f => ({ ...f, amenities: e.target.value }))} /></div>
-              <div className="space-y-2"><Label>{t("landlord.rulesLabel")}</Label><Input placeholder={t("landlord.rulesLabel")} value={form.houseRules} onChange={e => setForm(f => ({ ...f, houseRules: e.target.value }))} /></div>
-              {!editId && <div className="space-y-2"><Label>{t("landlord.images")}</Label><Input type="file" multiple accept="image/*" /></div>}
               <Button type="submit" className="w-full font-semibold" disabled={isSaving}>
-                {isSaving ? t("landlord.saving") : editId ? t("landlord.updateProperty") : t("landlord.saveProperty")}
+                {isSaving ? (t("landlord.saving") || "Inahifadhi...") : editId ? t("landlord.updateProperty") : t("landlord.saveProperty")}
               </Button>
             </form>
           </DialogContent>
@@ -136,7 +145,6 @@ const LandlordProperties = () => {
                   <TableHead>{t("landlord.title")}</TableHead>
                   <TableHead>{t("landlord.location")}</TableHead>
                   <TableHead>{t("landlord.price")}</TableHead>
-                  <TableHead>{t("landlord.bedroomsCol")}</TableHead>
                   <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -146,7 +154,6 @@ const LandlordProperties = () => {
                     <TableCell className="font-medium">{p.title}</TableCell>
                     <TableCell>{p.location}</TableCell>
                     <TableCell>TZS {Number(p.price).toLocaleString()}</TableCell>
-                    <TableCell>{p.bedrooms}</TableCell>
                     <TableCell className="text-right space-x-1">
                       <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="h-4 w-4" /></Button>
                       <AlertDialog>
@@ -167,7 +174,7 @@ const LandlordProperties = () => {
                     </TableCell>
                   </TableRow>
                 )) : (
-                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">{t("landlord.noProperties")}</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">{t("landlord.noProperties")}</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>

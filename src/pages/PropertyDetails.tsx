@@ -1,41 +1,34 @@
-import { useParams, Link } from "react-router-dom";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams, Link } from "react-router-dom";
+import { format } from "date-fns";
+import { ArrowLeft, Bed, CalendarIcon, MapPin, Shield, User } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { CalendarIcon, MapPin, Bed, ArrowLeft, User, Shield, CheckCircle, Clock, XCircle } from "lucide-react";
+import { applications as applicationsApi, normalizePropertyImages, properties as propertiesApi, viewings as viewingsApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { properties as propertiesApi, viewings as viewingsApi, applications as appApi } from "@/lib/api";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const PropertyDetails = () => {
   const { id } = useParams();
   const { t } = useLanguage();
-  const { user, isAuthenticated } = useAuth();
-  const queryClient = useQueryClient();
-
-  // Application form state
-  const [applyOpen, setApplyOpen] = useState(false);
-  const [employment, setEmployment] = useState("");
-  const [lengthOfStay, setLengthOfStay] = useState("");
-  const [occupants, setOccupants] = useState("");
-
-  // Viewing form state
-  const [viewingOpen, setViewingOpen] = useState(false);
   const [date, setDate] = useState<Date>();
   const [timeWindow, setTimeWindow] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: property, isLoading } = useQuery({
     queryKey: ["property", id],
@@ -43,56 +36,49 @@ const PropertyDetails = () => {
     enabled: !!id,
   });
 
-  // Check tenant's application status for this property
-  const { data: myApplications } = useQuery({
-    queryKey: ["my-applications-for-property", id],
-    queryFn: () => appApi.checkForProperty(id!),
-    enabled: !!id && isAuthenticated && user?.role === "tenant",
+  const { data: applications = [] } = useQuery({
+    queryKey: ["my-applications"],
+    queryFn: applicationsApi.list,
+    enabled: !!user && user.role === "tenant",
   });
 
-  const myApp = myApplications?.find((a: any) => String(a.property) === id || String(a.propertyId) === id);
-  const appStatus = myApp?.status; // undefined | "pending" | "approved" | "rejected"
+  const myApplication = applications.find((app) => String(app.property) === String(id));
+  const canRequestViewing = myApplication?.status === "APPROVED";
 
   const applyMutation = useMutation({
-    mutationFn: (data: any) => appApi.create(data),
-    onSuccess: () => {
-      toast({ title: t("propertyDetails.applicationSent") });
-      setApplyOpen(false);
-      setEmployment("");
-      setLengthOfStay("");
-      setOccupants("");
-      queryClient.invalidateQueries({ queryKey: ["my-applications-for-property", id] });
+    mutationFn: () => {
+      if (!id) throw new Error("Property ID missing");
+      return applicationsApi.create({ property: String(id), message: "" });
     },
-    onError: (err: any) => toast({ title: err.message, variant: "destructive" }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["my-applications"] });
+      toast({ title: t("propertyDetails.applicationSent") || "Ombi la nyumba limewasilishwa." });
+    },
+    onError: async (err: any) => {
+      const msg = String(err?.message || "Imeshindikana");
+      if (msg.toLowerCase().includes("already") || msg.toLowerCase().includes("active application")) {
+        await queryClient.invalidateQueries({ queryKey: ["my-applications"] });
+        toast({ title: t("propertyDetails.applicationPending") || "Umeshatuma ombi la nyumba hii tayari.", variant: "destructive" });
+        return;
+      }
+      toast({ title: msg, variant: "destructive" });
+    },
   });
 
   const viewingMutation = useMutation({
     mutationFn: (data: { property: string; date: string; time_window: string }) => viewingsApi.create(data),
     onSuccess: () => {
-      toast({ title: t("propertyDetails.viewingSent") });
-      setViewingOpen(false);
+      toast({ title: t("propertyDetails.viewingSent") || "Ombi la kuona limewasilishwa!" });
+      setDialogOpen(false);
       setDate(undefined);
       setTimeWindow("");
     },
-    onError: (err: any) => toast({ title: err.message, variant: "destructive" }),
+    onError: (err: any) => toast({ title: err.message || "Imeshindikana", variant: "destructive" }),
   });
-
-  const handleApply = () => {
-    if (!employment || !lengthOfStay || !occupants) {
-      toast({ title: t("login.fillAll"), variant: "destructive" });
-      return;
-    }
-    applyMutation.mutate({
-      property: id,
-      employment_status: employment,
-      length_of_stay: lengthOfStay,
-      occupants: Number(occupants),
-    });
-  };
 
   const handleRequestViewing = () => {
     if (!date || !timeWindow) {
-      toast({ title: t("login.fillAll"), variant: "destructive" });
+      toast({ title: t("login.fillAll") || "Tafadhali chagua tarehe na muda", variant: "destructive" });
       return;
     }
     viewingMutation.mutate({
@@ -115,24 +101,22 @@ const PropertyDetails = () => {
   if (!property) {
     return (
       <div className="container py-10 text-center">
-        <p className="text-muted-foreground">{t("propertyDetails.notFound")}</p>
-        <Button variant="link" asChild><Link to="/properties">{t("propertyDetails.back")}</Link></Button>
+        <p className="text-muted-foreground">{t("propertyDetails.notFound") || "Nyumba haipatikani"}</p>
+        <Button variant="link" asChild><Link to="/properties">{t("propertyDetails.back") || "Rudi kwenye orodha"}</Link></Button>
       </div>
     );
   }
 
-  const images = property.images?.length ? property.images : ["/placeholder.svg"];
+  const images = normalizePropertyImages(property.images);
   const amenities = property.amenities || [];
   const houseRules = property.house_rules || property.houseRules || [];
-  const isTenant = isAuthenticated && user?.role === "tenant";
 
   return (
     <div className="container py-10 max-w-4xl animate-slide-up">
       <Button variant="ghost" size="sm" asChild className="mb-4">
-        <Link to="/properties"><ArrowLeft className="h-4 w-4 mr-1" />{t("propertyDetails.back")}</Link>
+        <Link to="/properties"><ArrowLeft className="h-4 w-4 mr-1" />{t("propertyDetails.back") || "Rudi kwenye orodha"}</Link>
       </Button>
 
-      {/* Gallery */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-8 rounded-2xl overflow-hidden shadow-lg">
         <div className="md:col-span-2 aspect-[16/10] bg-muted">
           <img src={images[0]} alt={property.title} className="h-full w-full object-cover" />
@@ -152,19 +136,19 @@ const PropertyDetails = () => {
             <h1 className="text-3xl font-extrabold text-foreground">{property.title}</h1>
             <div className="flex items-center gap-3 mt-3 text-muted-foreground text-sm">
               <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{property.location}</span>
-              <span className="flex items-center gap-1"><Bed className="h-4 w-4" />{property.bedrooms} {t("propertyDetails.bedroomCount")}</span>
+              <span className="flex items-center gap-1"><Bed className="h-4 w-4" />{property.bedrooms || 0} {t("propertyDetails.bedroomCount") || "chumba cha kulala"}</span>
             </div>
-            <p className="text-3xl font-extrabold text-primary mt-4">TZS {Number(property.price).toLocaleString()}<span className="text-sm font-normal text-muted-foreground">{t("landing.perMonth")}</span></p>
+            <p className="text-3xl font-extrabold text-primary mt-4">TZS {Number(property.price).toLocaleString()}<span className="text-sm font-normal text-muted-foreground">{t("landing.perMonth") || "/mwezi"}</span></p>
           </div>
 
           <div>
-            <h2 className="font-bold text-foreground mb-3 text-lg">{t("propertyDetails.description")}</h2>
+            <h2 className="font-bold text-foreground mb-3 text-lg">{t("propertyDetails.description") || "Maelezo"}</h2>
             <p className="text-muted-foreground leading-relaxed">{property.description}</p>
           </div>
 
           {amenities.length > 0 && (
             <div>
-              <h2 className="font-bold text-foreground mb-3 text-lg">{t("propertyDetails.amenities")}</h2>
+              <h2 className="font-bold text-foreground mb-3 text-lg">{t("propertyDetails.amenities") || "Vifaa"}</h2>
               <div className="flex flex-wrap gap-2">
                 {amenities.map((a: string) => (
                   <Badge key={a} variant="secondary" className="px-3 py-1">{a}</Badge>
@@ -175,7 +159,7 @@ const PropertyDetails = () => {
 
           {houseRules.length > 0 && (
             <div>
-              <h2 className="font-bold text-foreground mb-3 text-lg">{t("propertyDetails.houseRules")}</h2>
+              <h2 className="font-bold text-foreground mb-3 text-lg">{t("propertyDetails.houseRules") || "Sheria za Nyumba"}</h2>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 {houseRules.map((r: string) => (
                   <li key={r} className="flex items-center gap-2"><Shield className="h-3.5 w-3.5 text-primary" />{r}</li>
@@ -185,7 +169,6 @@ const PropertyDetails = () => {
           )}
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-4">
           <Card className="glass-strong">
             <CardContent className="p-5 space-y-3">
@@ -194,94 +177,45 @@ const PropertyDetails = () => {
                   <User className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm text-foreground">{property.owner_name || t("propertyDetails.owner")}</p>
-                  <p className="text-xs text-muted-foreground">{property.owner_phone || ""}</p>
+                  <p className="font-semibold text-sm text-foreground">{property.owner_name || t("propertyDetails.owner") || "Mmiliki"}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Application status indicator */}
-          {isTenant && appStatus === "pending" && (
-            <Card className="border-warning/30 bg-warning/5">
-              <CardContent className="p-4 flex items-center gap-3">
-                <Clock className="h-5 w-5 text-warning" />
-                <p className="text-sm font-medium text-warning">{t("propertyDetails.applicationPending")}</p>
+          {user?.role === "tenant" && !myApplication && (
+            <Button className="w-full h-12 text-base font-semibold" size="lg" onClick={() => applyMutation.mutate()} disabled={applyMutation.isPending}>
+              {applyMutation.isPending ? (t("propertyDetails.submitting") || "Inawasilisha...") : (t("propertyDetails.apply") || "Omba Nyumba")}
+            </Button>
+          )}
+
+          {user?.role === "tenant" && myApplication && (
+            <Card>
+              <CardContent className="p-4 text-sm">
+                <p className="font-semibold">Hali ya ombi: {myApplication.status}</p>
+                {myApplication.status === "PENDING" && <p className="text-muted-foreground mt-1">{t("propertyDetails.applicationPending") || "Subiri landlord akubali au akatae ombi."}</p>}
+                {myApplication.status === "REJECTED" && <p className="text-muted-foreground mt-1">{t("status.rejected") || "Ombi lako lilikataliwa."}</p>}
               </CardContent>
             </Card>
           )}
 
-          {isTenant && appStatus === "approved" && (
-            <Card className="border-success/30 bg-success/5">
-              <CardContent className="p-4 flex items-center gap-3">
-                <CheckCircle className="h-5 w-5 text-success" />
-                <p className="text-sm font-medium text-success">{t("propertyDetails.applicationApproved")}</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {isTenant && appStatus === "rejected" && (
-            <Card className="border-destructive/30 bg-destructive/5">
-              <CardContent className="p-4 flex items-center gap-3">
-                <XCircle className="h-5 w-5 text-destructive" />
-                <p className="text-sm font-medium text-destructive">{t("status.rejected")}</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* STEP 1: Apply button (only if no application yet) */}
-          {isTenant && !appStatus && (
-            <Dialog open={applyOpen} onOpenChange={setApplyOpen}>
+          {user?.role === "tenant" && canRequestViewing && (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="w-full h-12 text-base font-semibold shadow-lg animate-pulse-glow" size="lg">
-                  {t("propertyDetails.apply")}
-                </Button>
+                <Button className="w-full h-12 text-base font-semibold shadow-lg" size="lg">{t("propertyDetails.requestViewing") || "Omba Kuona"}</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{t("propertyDetails.applyTitle")}</DialogTitle>
+                  <DialogTitle>{t("propertyDetails.requestViewingTitle") || "Panga Kuona Nyumba"}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 pt-2">
                   <div className="space-y-2">
-                    <Label>{t("propertyDetails.employment")}</Label>
-                    <Input placeholder={t("propertyDetails.employmentPlaceholder")} value={employment} onChange={(e) => setEmployment(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t("propertyDetails.lengthOfStay")}</Label>
-                    <Input placeholder={t("propertyDetails.stayPlaceholder")} value={lengthOfStay} onChange={(e) => setLengthOfStay(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t("propertyDetails.occupants")}</Label>
-                    <Input type="number" placeholder={t("propertyDetails.occupantsPlaceholder")} value={occupants} onChange={(e) => setOccupants(e.target.value)} />
-                  </div>
-                  <Button className="w-full font-semibold" onClick={handleApply} disabled={applyMutation.isPending}>
-                    {applyMutation.isPending ? t("propertyDetails.submitting") : t("propertyDetails.submitApplication")}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
-
-          {/* STEP 2: Request viewing (only if application approved) */}
-          {isTenant && appStatus === "approved" && (
-            <Dialog open={viewingOpen} onOpenChange={setViewingOpen}>
-              <DialogTrigger asChild>
-                <Button className="w-full h-12 text-base font-semibold shadow-lg" size="lg" variant="outline">
-                  {t("propertyDetails.requestViewing")}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t("propertyDetails.requestViewingTitle")}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-2">
-                  <div className="space-y-2">
-                    <Label>{t("propertyDetails.selectDate")}</Label>
+                    <Label>{t("propertyDetails.selectDate") || "Chagua Tarehe"}</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {date ? format(date, "PPP") : t("propertyDetails.selectDate")}
+                          {date ? format(date, "PPP") : (t("propertyDetails.selectDate") || "Chagua tarehe")}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -290,29 +224,22 @@ const PropertyDetails = () => {
                     </Popover>
                   </div>
                   <div className="space-y-2">
-                    <Label>{t("propertyDetails.selectTime")}</Label>
+                    <Label>{t("propertyDetails.selectTime") || "Muda"}</Label>
                     <Select value={timeWindow} onValueChange={setTimeWindow}>
-                      <SelectTrigger><SelectValue placeholder={t("propertyDetails.selectTime")} /></SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder={t("propertyDetails.selectTime") || "Chagua muda"} /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="morning">{t("propertyDetails.morning")}</SelectItem>
-                        <SelectItem value="afternoon">{t("propertyDetails.afternoon")}</SelectItem>
-                        <SelectItem value="evening">{t("propertyDetails.evening")}</SelectItem>
+                        <SelectItem value="morning">{t("propertyDetails.morning") || "Asubuhi (8AM-12PM)"}</SelectItem>
+                        <SelectItem value="afternoon">{t("propertyDetails.afternoon") || "Mchana (12PM-4PM)"}</SelectItem>
+                        <SelectItem value="evening">{t("propertyDetails.evening") || "Jioni (4PM-7PM)"}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <Button className="w-full font-semibold" onClick={handleRequestViewing} disabled={viewingMutation.isPending}>
-                    {viewingMutation.isPending ? t("propertyDetails.submitting") : t("propertyDetails.submitViewing")}
+                    {viewingMutation.isPending ? (t("propertyDetails.submitting") || "Inawasilisha...") : (t("propertyDetails.submitViewing") || "Wasilisha Ombi")}
                   </Button>
                 </div>
               </DialogContent>
             </Dialog>
-          )}
-
-          {/* Not logged in or landlord */}
-          {!isTenant && (
-            <Button className="w-full h-12 text-base font-semibold shadow-lg" size="lg" asChild>
-              <Link to="/login">{t("nav.login")}</Link>
-            </Button>
           )}
         </div>
       </div>

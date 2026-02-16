@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,15 +8,25 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { Property } from "@/types";
+import { normalizePropertyImages, properties as propertiesApi } from "@/lib/api";
 
-const mockProperties: Property[] = [
-  { id: "1", title: "Studio ya Kisasa Masaki", description: "Studio nzuri ya kisasa.", price: 800000, location: "Masaki, Dar es Salaam", bedrooms: 1, propertyType: "studio", amenities: ["WiFi", "Parking"], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l1", created_at: "" },
-  { id: "2", title: "Nyumba 2BR Mikocheni", description: "Nyumba pana ya vyumba viwili.", price: 1200000, location: "Mikocheni, Dar es Salaam", bedrooms: 2, propertyType: "apartment", amenities: ["WiFi", "Ulinzi"], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l2", created_at: "" },
-  { id: "3", title: "Chumba Sinza", description: "Bei nafuu na starehe.", price: 500000, location: "Sinza, Dar es Salaam", bedrooms: 1, propertyType: "apartment", amenities: ["Maji"], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l3", created_at: "" },
-  { id: "4", title: "Nyumba ya Familia Mbezi", description: "Nyumba kubwa ya familia.", price: 2000000, location: "Mbezi Beach", bedrooms: 3, propertyType: "house", amenities: ["Bustani", "Parking", "WiFi"], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l4", created_at: "" },
-  { id: "5", title: "Penthouse Oyster Bay", description: "Penthouse ya kifahari.", price: 3500000, location: "Oyster Bay", bedrooms: 3, propertyType: "apartment", amenities: ["Bwawa", "Gym", "WiFi"], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l5", created_at: "" },
-  { id: "6", title: "Chumba Kinondoni", description: "Chumba kimoja bei nafuu.", price: 250000, location: "Kinondoni", bedrooms: 1, propertyType: "room", amenities: [], houseRules: [], images: ["/placeholder.svg"], status: "available", owner: "l6", created_at: "" },
-];
+function mapApiProperty(item: any): Property {
+  return {
+    id: String(item.id),
+    title: item.title || "Nyumba",
+    description: item.description || "",
+    price: Number(item.price || 0),
+    location: item.location || "Eneo halijatajwa",
+    bedrooms: Number(item.bedrooms || 0),
+    propertyType: item.property_type || item.propertyType || "house",
+    amenities: Array.isArray(item.amenities) ? item.amenities : [],
+    houseRules: Array.isArray(item.house_rules) ? item.house_rules : Array.isArray(item.houseRules) ? item.houseRules : [],
+    images: normalizePropertyImages(item.images),
+    status: item.status || "available",
+    owner: String(item.owner || ""),
+    created_at: item.created_at || "",
+  };
+}
 
 const Properties = () => {
   const { t } = useLanguage();
@@ -23,11 +34,17 @@ const Properties = () => {
   const [propertyType, setPropertyType] = useState("");
   const [bedrooms, setBedrooms] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const { data } = useQuery({
+    queryKey: ["public-properties"],
+    queryFn: () => propertiesApi.list(),
+  });
+  const allProperties = (data || []).map(mapApiProperty);
 
-  const filtered = mockProperties.filter((p) => {
+  const filtered = allProperties.filter((p) => {
     if (location && !p.location.toLowerCase().includes(location.toLowerCase())) return false;
     if (propertyType && p.propertyType !== propertyType) return false;
-    if (bedrooms && p.bedrooms !== Number(bedrooms)) return false;
+    if (bedrooms && Number(bedrooms) === 3 && p.bedrooms < 3) return false;
+    if (bedrooms && Number(bedrooms) !== 3 && p.bedrooms !== Number(bedrooms)) return false;
     return true;
   });
 
