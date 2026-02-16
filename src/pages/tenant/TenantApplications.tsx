@@ -1,18 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import { StatusBadge } from "@/components/StatusBadge";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/StatusBadge";
 import { applications as appApi } from "@/lib/api";
-import { useLanguage } from "@/i18n/LanguageContext";
-import { Link } from "react-router-dom";
 import type { RequestStatus } from "@/types";
-import { ClipboardList, Eye } from "lucide-react";
+
+function normalizeStatus(status: string): RequestStatus {
+  const normalized = status.toLowerCase();
+  if (["approved", "accepted", "leased", "active", "closed", "viewing_scheduled"].includes(normalized)) return "approved";
+  if (normalized === "rejected") return "rejected";
+  return "pending";
+}
 
 const TenantApplications = () => {
-  const { t } = useLanguage();
-
   const { data, isLoading } = useQuery({
     queryKey: ["tenant-applications"],
     queryFn: appApi.list,
@@ -20,53 +21,27 @@ const TenantApplications = () => {
 
   return (
     <div className="space-y-6 animate-slide-up">
-      <div className="flex items-center gap-3">
-        <ClipboardList className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold text-foreground">{t("tenant.myApplications")}</h1>
-      </div>
+      <h1 className="text-2xl font-bold text-foreground">Maombi Yangu</h1>
 
       <Card className="glass-strong border-border/30">
-        <CardHeader><CardTitle className="text-lg">{t("tenant.myApplications")}</CardTitle></CardHeader>
-        <CardContent>
+        <CardHeader>
+          <CardTitle className="text-lg">Maombi ya Nyumba</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
           {isLoading ? (
-            <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full" />)}</div>
+            [1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full" />)
+          ) : data && data.length > 0 ? (
+            data.map((a: any) => (
+              <div key={a.id} className="border rounded-lg p-4 flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-foreground">{a.property_title || `Nyumba #${a.property}`}</p>
+                  <p className="text-xs text-muted-foreground">{a.created_at ? new Date(a.created_at).toLocaleString("sw-TZ") : ""}</p>
+                </div>
+                <StatusBadge status={normalizeStatus(a.status)} />
+              </div>
+            ))
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("common.property")}</TableHead>
-                  <TableHead>{t("propertyDetails.employment")}</TableHead>
-                  <TableHead>{t("propertyDetails.lengthOfStay")}</TableHead>
-                  <TableHead>{t("propertyDetails.occupants")}</TableHead>
-                  <TableHead>{t("common.status")}</TableHead>
-                  <TableHead className="text-right">{t("common.actions")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data && data.length > 0 ? data.map((a: any) => (
-                  <TableRow key={a.id} className="hover:bg-muted/50 transition-colors">
-                    <TableCell className="font-medium">{a.property_title || `${t("common.property")} #${a.property || a.propertyId}`}</TableCell>
-                    <TableCell>{a.employment_status || a.employmentStatus || "—"}</TableCell>
-                    <TableCell>{a.length_of_stay || a.lengthOfStay || "—"}</TableCell>
-                    <TableCell>{a.occupants || "—"}</TableCell>
-                    <TableCell><StatusBadge status={a.status as RequestStatus} /></TableCell>
-                    <TableCell className="text-right">
-                      {a.status === "approved" && (
-                        <Button size="sm" variant="outline" asChild>
-                          <Link to={`/properties/${a.property || a.propertyId}`}>
-                            <Eye className="h-3.5 w-3.5 mr-1" />{t("propertyDetails.requestViewing")}
-                          </Link>
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                )) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">{t("tenant.noApplications")}</TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+            <p className="text-muted-foreground text-sm py-8 text-center">Bado hujatuma ombi lolote</p>
           )}
         </CardContent>
       </Card>
