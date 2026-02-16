@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/i18n/LanguageContext";
 import { PublicLayout } from "@/components/layouts/PublicLayout";
 import { DashboardLayout } from "@/components/layouts/DashboardLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -15,14 +16,22 @@ import Properties from "./pages/Properties";
 import PropertyDetails from "./pages/PropertyDetails";
 import NotFound from "./pages/NotFound";
 
+import TenantApplications from "./pages/tenant/TenantApplications";
 import TenantViewings from "./pages/tenant/TenantViewings";
+import TenantLeases from "./pages/tenant/TenantLeases";
 import TenantPayments from "./pages/tenant/TenantPayments";
+import TenantInvoices from "./pages/tenant/TenantInvoices";
+import TenantMessages from "./pages/tenant/TenantMessages";
+
 import LandlordOverview from "./pages/landlord/LandlordOverview";
 import LandlordProperties from "./pages/landlord/LandlordProperties";
 import LandlordViewings from "./pages/landlord/LandlordViewings";
 import LandlordApplications from "./pages/landlord/LandlordApplications";
 import LandlordLeases from "./pages/landlord/LandlordLeases";
 import LandlordPayments from "./pages/landlord/LandlordPayments";
+import LandlordInvoices from "./pages/landlord/LandlordInvoices";
+import LandlordMessages from "./pages/landlord/LandlordMessages";
+
 import AdminOverview from "./pages/admin/AdminOverview";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminProperties from "./pages/admin/AdminProperties";
@@ -32,65 +41,71 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public */}
-            <Route element={<PublicLayout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/properties" element={<Properties />} />
-              <Route path="/properties/:id" element={<PropertyDetails />} />
-            </Route>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+    <LanguageProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public */}
+              <Route element={<PublicLayout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/properties" element={<Properties />} />
+                <Route path="/properties/:id" element={<PropertyDetails />} />
+              </Route>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-            {/* Tenant & Landlord Dashboard */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["tenant", "landlord"]}>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              {/* Tenant */}
-              <Route path="viewings" element={<TenantViewings />} />
-              <Route path="applications" element={<TenantViewings />} />
-              <Route path="leases" element={<TenantViewings />} />
-              <Route path="payments" element={<TenantPayments />} />
-              {/* Landlord */}
-              <Route path="overview" element={<LandlordOverview />} />
-              <Route path="properties" element={<LandlordProperties />} />
-              <Route path="properties/new" element={<LandlordProperties />} />
-              <Route path="landlord-viewings" element={<LandlordViewings />} />
-              <Route path="landlord-applications" element={<LandlordApplications />} />
-              <Route path="landlord-leases" element={<LandlordLeases />} />
-              <Route path="landlord-payments" element={<LandlordPayments />} />
-            </Route>
+              {/* Tenant & Landlord Dashboard */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["tenant", "landlord"]}>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                {/* Tenant */}
+                <Route path="applications" element={<TenantApplications />} />
+                <Route path="viewings" element={<TenantViewings />} />
+                <Route path="leases" element={<TenantLeases />} />
+                <Route path="payments" element={<TenantPayments />} />
+                <Route path="invoices" element={<TenantInvoices />} />
+                <Route path="messages" element={<TenantMessages />} />
+                {/* Landlord */}
+                <Route path="overview" element={<LandlordOverview />} />
+                <Route path="properties" element={<LandlordProperties />} />
+                <Route path="properties/new" element={<LandlordProperties />} />
+                <Route path="landlord-viewings" element={<LandlordViewings />} />
+                <Route path="landlord-applications" element={<LandlordApplications />} />
+                <Route path="landlord-leases" element={<LandlordLeases />} />
+                <Route path="landlord-payments" element={<LandlordPayments />} />
+                <Route path="landlord-invoices" element={<LandlordInvoices />} />
+                <Route path="landlord-messages" element={<LandlordMessages />} />
+              </Route>
 
-            {/* Admin */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="overview" element={<AdminOverview />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="properties" element={<AdminProperties />} />
-              <Route path="analytics" element={<AdminAnalytics />} />
-            </Route>
+              {/* Admin */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="overview" element={<AdminOverview />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="properties" element={<AdminProperties />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+              </Route>
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 
