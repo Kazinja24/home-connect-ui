@@ -20,7 +20,7 @@ const TenantLeases = () => {
   const handleSign = async (id: string) => {
     try {
       await leasesApi.sign(id);
-      toast({ title: t("tenant.leaseSigned") });
+      toast({ title: "Tenant confirmation recorded." });
       refetch();
     } catch (err: any) {
       toast({ title: err.message || t("tenant.signFailed"), variant: "destructive" });
@@ -43,17 +43,27 @@ const TenantLeases = () => {
             <div key={l.id} className="border rounded-xl p-5 space-y-3 hover:bg-muted/30 transition-colors">
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-foreground">{l.property_title || `${t("common.property")} #${l.property || l.propertyId}`}</p>
-                <StatusBadge status={l.status === "signed" || l.status === "active" ? "approved" : "pending"} />
+                <StatusBadge status={l.status === "active" ? "approved" : l.status === "terminated" ? "rejected" : "pending"} />
               </div>
               <div className="text-sm text-muted-foreground">
                 <p><strong>{t("common.status")}:</strong> {l.status}</p>
-                {l.signed_at && <p><strong>{t("tenant.leaseSigned")}:</strong> {new Date(l.signed_at).toLocaleDateString()}</p>}
+                {l.tenant_confirmed_at ? <p><strong>Tenant confirmed:</strong> {new Date(l.tenant_confirmed_at).toLocaleDateString()}</p> : null}
+                {l.landlord_confirmed_at ? <p><strong>Landlord confirmed:</strong> {new Date(l.landlord_confirmed_at).toLocaleDateString()}</p> : null}
+                {l.signed_at ? <p><strong>Both confirmed:</strong> {new Date(l.signed_at).toLocaleDateString()}</p> : null}
               </div>
-              {l.status !== "signed" && l.status !== "active" && (
-                <Button size="sm" className="font-semibold shadow-sm" onClick={() => handleSign(l.id)}>
-                  {t("tenant.signLease")}
-                </Button>
-              )}
+              <div className="flex items-center space-x-2">
+                {l.contract_file ? (
+                  <Button size="sm" className="font-semibold" onClick={() => leasesApi.downloadContract(l.id).catch((err) => toast({ title: err.message || t("tenant.downloadFailed"), variant: "destructive" }))}>
+                    {t("tenant.downloadContract") || "Download Contract"}
+                  </Button>
+                ) : null}
+
+                {l.status === "pending" && !l.tenant_confirmed_at && (
+                  <Button size="sm" className="font-semibold shadow-sm" onClick={() => handleSign(l.id)}>
+                    Confirm Agreement
+                  </Button>
+                )}
+              </div>
             </div>
           )) : (
             <p className="text-muted-foreground text-sm py-8 text-center">{t("tenant.noLeases")}</p>

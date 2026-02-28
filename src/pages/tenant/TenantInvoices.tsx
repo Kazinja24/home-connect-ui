@@ -1,32 +1,18 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Receipt } from "lucide-react";
 import { invoices as invoicesApi } from "@/lib/api";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { useToast } from "@/hooks/use-toast";
 
 const TenantInvoices = () => {
   const { t } = useLanguage();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["tenant-invoices"],
     queryFn: invoicesApi.list,
-  });
-
-  const payMutation = useMutation({
-    mutationFn: (id: string) => invoicesApi.pay(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tenant-invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["tenant-payments"] });
-      toast({ title: t("status.paid") });
-    },
-    onError: (err: any) => toast({ title: err.message, variant: "destructive" }),
   });
 
   const statusVariant = (status: string) => {
@@ -56,7 +42,6 @@ const TenantInvoices = () => {
                   <TableHead>{t("tenant.dueDate")}</TableHead>
                   <TableHead>{t("landlord.invoiceDescription")}</TableHead>
                   <TableHead>{t("common.status")}</TableHead>
-                  <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -69,17 +54,10 @@ const TenantInvoices = () => {
                     <TableCell>
                       <Badge variant={statusVariant(inv.status)}>{t(`status.${inv.status}`) || inv.status}</Badge>
                     </TableCell>
-                    <TableCell className="text-right">
-                      {inv.status !== "paid" && (
-                        <Button size="sm" disabled={payMutation.isPending} onClick={() => payMutation.mutate(inv.id)}>
-                          {t("tenant.payInvoice")}
-                        </Button>
-                      )}
-                    </TableCell>
                   </TableRow>
                 )) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">{t("tenant.noInvoices")}</TableCell>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">{t("tenant.noInvoices")}</TableCell>
                   </TableRow>
                 )}
               </TableBody>

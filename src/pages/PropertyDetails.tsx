@@ -43,7 +43,7 @@ const PropertyDetails = () => {
   });
 
   const myApplication = applications.find((app) => String(app.property) === String(id));
-  const canRequestViewing = myApplication?.status === "APPROVED";
+  const canRequestViewing = String(myApplication?.status || "").toLowerCase() === "approved";
 
   const applyMutation = useMutation({
     mutationFn: () => {
@@ -66,7 +66,7 @@ const PropertyDetails = () => {
   });
 
   const viewingMutation = useMutation({
-    mutationFn: (data: { property: string; date: string; time_window: string }) => viewingsApi.create(data),
+    mutationFn: (data: { application: string; date: string; time_window: string }) => viewingsApi.create(data),
     onSuccess: () => {
       toast({ title: t("propertyDetails.viewingSent") || "Ombi la kuona limewasilishwa!" });
       setDialogOpen(false);
@@ -82,7 +82,7 @@ const PropertyDetails = () => {
       return;
     }
     viewingMutation.mutate({
-      property: id!,
+      application: String(myApplication.id),
       date: format(date, "yyyy-MM-dd"),
       time_window: timeWindow,
     });
@@ -108,7 +108,7 @@ const PropertyDetails = () => {
   }
 
   const images = normalizePropertyImages(property.images);
-  const amenities = property.amenities || [];
+  const amenities = Array.isArray(property.features) ? property.features.map((f:any) => f.name) : property.amenities || [];
   const houseRules = property.house_rules || property.houseRules || [];
 
   return (
@@ -193,8 +193,8 @@ const PropertyDetails = () => {
             <Card>
               <CardContent className="p-4 text-sm">
                 <p className="font-semibold">Hali ya ombi: {myApplication.status}</p>
-                {myApplication.status === "PENDING" && <p className="text-muted-foreground mt-1">{t("propertyDetails.applicationPending") || "Subiri landlord akubali au akatae ombi."}</p>}
-                {myApplication.status === "REJECTED" && <p className="text-muted-foreground mt-1">{t("status.rejected") || "Ombi lako lilikataliwa."}</p>}
+                {String(myApplication.status).toLowerCase() === "pending" && <p className="text-muted-foreground mt-1">{t("propertyDetails.applicationPending") || "Subiri landlord akubali au akatae ombi."}</p>}
+                {String(myApplication.status).toLowerCase() === "rejected" && <p className="text-muted-foreground mt-1">{t("status.rejected") || "Ombi lako lilikataliwa."}</p>}
               </CardContent>
             </Card>
           )}

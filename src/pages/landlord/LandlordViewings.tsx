@@ -9,6 +9,13 @@ import { viewings as viewingsApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import type { RequestStatus } from "@/types";
 
+function normalizeStatus(status: string): RequestStatus {
+  const normalized = String(status).toLowerCase();
+  if (["approved", "completed"].includes(normalized)) return "approved";
+  if (normalized === "rejected") return "rejected";
+  return "pending";
+}
+
 const LandlordViewings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -28,7 +35,7 @@ const LandlordViewings = () => {
   });
 
   const completeMutation = useMutation({
-    mutationFn: ({ id, outcome }: { id: string; outcome: "ACCEPTED" | "REJECTED" }) => viewingsApi.complete(id, outcome),
+    mutationFn: (id: string) => viewingsApi.complete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["landlord-viewings"] });
       queryClient.invalidateQueries({ queryKey: ["landlord-applications"] });
@@ -63,7 +70,7 @@ const LandlordViewings = () => {
                     <TableCell>{v.property_title || `Nyumba #${v.property}`}</TableCell>
                     <TableCell>{v.date || (v.scheduled_date ? new Date(v.scheduled_date).toLocaleDateString("sw-TZ") : "-")}</TableCell>
                     <TableCell>{v.time_window === "morning" ? "Asubuhi" : v.time_window === "afternoon" ? "Mchana" : "Jioni"}</TableCell>
-                    <TableCell><StatusBadge status={v.status as RequestStatus} /></TableCell>
+                    <TableCell><StatusBadge status={normalizeStatus(v.status)} /></TableCell>
                     <TableCell className="text-right space-x-1">
                       {v.status === "pending" && (
                         <>
@@ -72,25 +79,14 @@ const LandlordViewings = () => {
                         </>
                       )}
                       {v.status === "approved" && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={completeMutation.isPending}
-                            onClick={() => completeMutation.mutate({ id: String(v.id), outcome: "ACCEPTED" })}
-                          >
-                            Viewing Accepted
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-destructive"
-                            disabled={completeMutation.isPending}
-                            onClick={() => completeMutation.mutate({ id: String(v.id), outcome: "REJECTED" })}
-                          >
-                            Viewing Rejected
-                          </Button>
-                        </>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={completeMutation.isPending}
+                          onClick={() => completeMutation.mutate(String(v.id))}
+                        >
+                          Mark Completed
+                        </Button>
                       )}
                     </TableCell>
                   </TableRow>

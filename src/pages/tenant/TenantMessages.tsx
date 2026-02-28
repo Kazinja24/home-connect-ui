@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, Send } from "lucide-react";
-import { messages as messagesApi, leases as leasesApi } from "@/lib/api";
+import { messages as messagesApi } from "@/lib/api";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -15,35 +15,33 @@ const TenantMessages = () => {
   const { t } = useLanguage();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [selectedLease, setSelectedLease] = useState<string | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [message, setMessage] = useState("");
 
-  const { data: leasesData, isLoading: leasesLoading } = useQuery({
-    queryKey: ["tenant-leases-for-messages"],
-    queryFn: leasesApi.list,
+  const { data: conversationsData, isLoading: conversationsLoading } = useQuery({
+    queryKey: ["tenant-conversations"],
+    queryFn: messagesApi.listConversations,
   });
 
   const { data: messagesData, isLoading: messagesLoading } = useQuery({
-    queryKey: ["messages", selectedLease],
-    queryFn: () => messagesApi.listByLease(selectedLease!),
-    enabled: !!selectedLease,
+    queryKey: ["messages", selectedConversation],
+    queryFn: () => messagesApi.listMessages(selectedConversation!),
+    enabled: !!selectedConversation,
     refetchInterval: 5000,
   });
 
   const sendMutation = useMutation({
-    mutationFn: (data: { lease: string; content: string }) => messagesApi.send(data),
+    mutationFn: (data: { conversation: string; content: string }) => messagesApi.send(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["messages", selectedLease] });
+      queryClient.invalidateQueries({ queryKey: ["messages", selectedConversation] });
       setMessage("");
     },
   });
 
   const handleSend = () => {
-    if (!message.trim() || !selectedLease) return;
-    sendMutation.mutate({ lease: selectedLease, content: message });
+    if (!message.trim() || !selectedConversation) return;
+    sendMutation.mutate({ conversation: selectedConversation, content: message });
   };
-
-  const activeLease = leasesData?.filter((l: any) => l.status === "signed" || l.status === "active") || [];
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -57,31 +55,33 @@ const TenantMessages = () => {
         <Card className="glass-strong border-border/30">
           <CardContent className="p-4 space-y-2">
             <p className="text-sm font-semibold text-muted-foreground mb-3">{t("messages.lease")}</p>
-            {leasesLoading ? (
+            {conversationsLoading ? (
               <div className="space-y-2">{[1, 2].map(i => <Skeleton key={i} className="h-14 w-full" />)}</div>
-            ) : activeLease.length > 0 ? activeLease.map((l: any) => (
+            ) : conversationsData && conversationsData.length > 0 ? conversationsData.map((conversation: any) => (
               <button
-                key={l.id}
-                onClick={() => setSelectedLease(String(l.id))}
+                key={conversation.id}
+                onClick={() => setSelectedConversation(String(conversation.id))}
                 className={cn(
                   "w-full text-left p-3 rounded-xl transition-colors",
-                  selectedLease === String(l.id)
+                  selectedConversation === String(conversation.id)
                     ? "bg-primary/10 border border-primary/30"
                     : "hover:bg-muted/50"
                 )}
               >
-                <p className="font-semibold text-sm text-foreground">{l.property_title || `${t("common.property")} #${l.property}`}</p>
-                <p className="text-xs text-muted-foreground">{l.landlord_name || t("propertyDetails.owner")}</p>
+                <p className="font-semibold text-sm text-foreground">
+                  {conversation.property_title || `${t("common.property")} #${conversation.property_id}`}
+                </p>
+                <p className="text-xs text-muted-foreground">{conversation.landlord_name || t("propertyDetails.owner")}</p>
               </button>
             )) : (
-              <p className="text-sm text-muted-foreground text-center py-8">{t("tenant.noLeases")}</p>
+              <p className="text-sm text-muted-foreground text-center py-8">{t("messages.noMessages")}</p>
             )}
           </CardContent>
         </Card>
 
         {/* Messages area */}
         <Card className="md:col-span-2 glass-strong border-border/30 flex flex-col">
-          {selectedLease ? (
+          {selectedConversation ? (
             <>
               <ScrollArea className="flex-1 p-4">
                 {messagesLoading ? (
@@ -89,7 +89,7 @@ const TenantMessages = () => {
                 ) : messagesData && messagesData.length > 0 ? (
                   <div className="space-y-3">
                     {messagesData.map((msg: any) => {
-                      const isMe = String(msg.sender) === user?.id || msg.sender_id === user?.id;
+                      const isMe = String(msg.sender_id) === user?.id;
                       return (
                         <div key={msg.id} className={cn("flex", isMe ? "justify-end" : "justify-start")}>
                           <div className={cn(

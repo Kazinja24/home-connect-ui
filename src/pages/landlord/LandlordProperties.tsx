@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
-import { properties as propertiesApi } from "@/lib/api";
+import { properties as propertiesApi, features as featuresApi, normalizePropertyImages } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
 
@@ -21,6 +21,10 @@ const LandlordProperties = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", description: "", price: "", location: "" });
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [availableFeatures, setAvailableFeatures] = useState<any[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<number[]>([]);
+  const [maxImageSizeMb, setMaxImageSizeMb] = useState(5);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -29,12 +33,41 @@ const LandlordProperties = () => {
     queryFn: () => propertiesApi.list(),
   });
 
+  const { data: featuresData } = useQuery({
+    queryKey: ["features"],
+    queryFn: () => featuresApi.list(),
+    onSuccess: (d: any) => setAvailableFeatures(d || []),
+  });
+
+  const { data: configData } = useQuery({
+    queryKey: ["properties-config"],
+    queryFn: () => propertiesApi.getConfig(),
+    onSuccess: (d: any) => setMaxImageSizeMb(d?.image_max_size_mb || 5),
+  });
+
   const createMutation = useMutation({
     mutationFn: (data: { title: string; description: string; price: number; location: string }) => propertiesApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
-      toast({ title: t("landlord.propertyAdded") });
-      resetForm();
+      // After property created, upload images if provided
+      return (async () => {
+        queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+        toast({ title: t("landlord.propertyAdded") });
+        // create returns the created property via API client; we need the id
+        // Refetch to get latest list and created property's id
+        const latest = await propertiesApi.list({});
+        const created = latest && latest.length ? latest[0] : null;
+        if (created && imageFiles && imageFiles.length > 0) {
+          const fd = new FormData();
+          imageFiles.forEach((f) => fd.append("images", f));
+          try {
+            await propertiesApi.uploadImages(String(created.id), fd);
+            queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+          } catch (err: any) {
+            toast({ title: String(err?.message || "Image upload failed"), variant: "destructive" });
+          }
+        }
+        resetForm();
+      })();
     },
     onError: (err: any) => toast({ title: err.message, variant: "destructive" }),
   });
@@ -42,9 +75,22 @@ const LandlordProperties = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<{ title: string; description: string; price: number; location: string }> }) => propertiesApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
-      toast({ title: t("landlord.propertyUpdated") });
-      resetForm();
+      // After update, upload any new images
+      (async () => {
+        queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+        toast({ title: t("landlord.propertyUpdated") });
+        if (editId && imageFiles && imageFiles.length > 0) {
+          const fd = new FormData();
+          imageFiles.forEach((f) => fd.append("images", f));
+          try {
+            await propertiesApi.uploadImages(editId, fd);
+            queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+          } catch (err: any) {
+            toast({ title: String(err?.message || "Image upload failed"), variant: "destructive" });
+          }
+        }
+        resetForm();
+      })();
     },
     onError: (err: any) => toast({ title: err.message, variant: "destructive" }),
   });
@@ -57,10 +103,47 @@ const LandlordProperties = () => {
     },
     onError: (err: any) => toast({ title: err.message, variant: "destructive" }),
   });
+  const submitForReviewMutation = useMutation({
+    mutationFn: (id: string) => propertiesApi.submitForReview(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+      toast({ title: "Property submitted for review." });
+    },
+    onError: (err: any) => toast({ title: err.message || "Submit for review failed", variant: "destructive" }),
+  });
+  const publishMutation = useMutation({
+    mutationFn: (id: string) => propertiesApi.publish(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+      toast({ title: "Property published." });
+    },
+    onError: (err: any) => toast({ title: err.message || "Publish failed", variant: "destructive" }),
+  });
+  const unpublishMutation = useMutation({
+    mutationFn: (id: string) => propertiesApi.unpublish(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+      toast({ title: "Property unpublished." });
+    },
+    onError: (err: any) => toast({ title: err.message || "Unpublish failed", variant: "destructive" }),
+  });
+  const ownershipMutation = useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) => {
+      const fd = new FormData();
+      fd.append("ownership_document", file);
+      return propertiesApi.submitOwnershipDocument(id, fd);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+      toast({ title: "Ownership document submitted." });
+    },
+    onError: (err: any) => toast({ title: err.message || "Ownership submission failed", variant: "destructive" }),
+  });
 
   const resetForm = () => {
     setForm({ title: "", description: "", price: "", location: "" });
     setEditId(null);
+    setSelectedFeatures([]);
     setDialogOpen(false);
   };
 
@@ -72,6 +155,12 @@ const LandlordProperties = () => {
       price: String(p.price || ""),
       location: p.location || "",
     });
+    // prefill selected features if present
+    if (Array.isArray(p.features)) {
+      setSelectedFeatures(p.features.map((f: any) => Number(f.id)));
+    } else {
+      setSelectedFeatures([]);
+    }
     setDialogOpen(true);
   };
 
@@ -79,7 +168,7 @@ const LandlordProperties = () => {
     e.preventDefault();
 
     if (editId) {
-      const payload: Partial<{ title: string; description: string; price: number; location: string }> = {};
+      let payload: Partial<{ title: string; description: string; price: number; location: string; feature_ids?: number[] }> = {};
       if (form.title.trim()) payload.title = form.title.trim();
       if (form.description.trim()) payload.description = form.description.trim();
       if (form.location.trim()) payload.location = form.location.trim();
@@ -89,15 +178,18 @@ const LandlordProperties = () => {
         toast({ title: "Weka angalau field moja ya kusasisha.", variant: "destructive" });
         return;
       }
+      // include features when updating
+      payload = { ...payload, feature_ids: selectedFeatures };
       updateMutation.mutate({ id: editId, data: payload });
       return;
     }
-
+    // include selected features in create
     const createPayload = {
       title: form.title.trim(),
       description: form.description.trim(),
       location: form.location.trim(),
       price: Number(form.price),
+      feature_ids: selectedFeatures,
     };
 
     if (!createPayload.title || !createPayload.description || !createPayload.location || Number.isNaN(createPayload.price)) {
@@ -126,6 +218,25 @@ const LandlordProperties = () => {
                 <div className="space-y-2"><Label>{t("landlord.priceLabel")}</Label><Input type="number" placeholder="800000" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} /></div>
                 <div className="space-y-2"><Label>{t("landlord.locationLabel")}</Label><Input placeholder={t("landlord.locationLabel")} value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} /></div>
               </div>
+              <div className="space-y-2">
+                <Label>Features / Amenities</Label>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border rounded">
+                  {availableFeatures && availableFeatures.length > 0 ? availableFeatures.map((f) => (
+                    <label key={f.id} className="flex items-center space-x-2">
+                      <input type="checkbox" checked={selectedFeatures.includes(Number(f.id))} onChange={(e) => {
+                        if (e.target.checked) setSelectedFeatures(s => Array.from(new Set([...s, Number(f.id)])));
+                        else setSelectedFeatures(s => s.filter(id => id !== Number(f.id)));
+                      }} />
+                      <span className="text-sm">{f.name}</span>
+                    </label>
+                  )) : (<div className="text-sm text-muted-foreground">No features available.</div>)}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Property Images</Label>
+                <input type="file" accept="image/*" multiple onChange={(e) => setImageFiles(Array.from(e.target.files || []))} />
+                <div className="text-sm text-muted-foreground">You may upload multiple images (max {maxImageSizeMb} MB each).</div>
+              </div>
               <Button type="submit" className="w-full font-semibold" disabled={isSaving}>
                 {isSaving ? (t("landlord.saving") || "Inahifadhi...") : editId ? t("landlord.updateProperty") : t("landlord.saveProperty")}
               </Button>
@@ -145,6 +256,7 @@ const LandlordProperties = () => {
                   <TableHead>{t("landlord.title")}</TableHead>
                   <TableHead>{t("landlord.location")}</TableHead>
                   <TableHead>{t("landlord.price")}</TableHead>
+                  <TableHead>Cover</TableHead>
                   <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -154,7 +266,40 @@ const LandlordProperties = () => {
                     <TableCell className="font-medium">{p.title}</TableCell>
                     <TableCell>{p.location}</TableCell>
                     <TableCell>TZS {Number(p.price).toLocaleString()}</TableCell>
+                    <TableCell>
+                      {p.images && p.images.length > 0 ? (
+                        <img src={normalizePropertyImages(p.images)[0]} alt="cover" className="h-12 w-20 object-cover rounded" />
+                      ) : (
+                        <div className="text-sm text-muted-foreground">No image</div>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right space-x-1">
+                      <label className="inline-flex">
+                        <input
+                          type="file"
+                          accept="image/*,application/pdf"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) ownershipMutation.mutate({ id: String(p.id), file });
+                          }}
+                        />
+                        <Button variant="ghost" size="sm" type="button">Ownership Doc</Button>
+                      </label>
+                      {p.listing_status === "draft" || p.listing_status === "rejected" ? (
+                        <Button variant="ghost" size="sm" type="button" onClick={() => submitForReviewMutation.mutate(String(p.id))}>
+                          Submit Review
+                        </Button>
+                      ) : null}
+                      {!p.is_published ? (
+                        <Button variant="ghost" size="sm" type="button" onClick={() => publishMutation.mutate(String(p.id))}>
+                          Publish
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" type="button" onClick={() => unpublishMutation.mutate(String(p.id))}>
+                          Unpublish
+                        </Button>
+                      )}
                       <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="h-4 w-4" /></Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>

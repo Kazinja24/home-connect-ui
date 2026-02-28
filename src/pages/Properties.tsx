@@ -8,7 +8,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { Property } from "@/types";
-import { normalizePropertyImages, properties as propertiesApi } from "@/lib/api";
+import { normalizePropertyImages, properties as propertiesApi, features as featuresApi } from "@/lib/api";
 
 function mapApiProperty(item: any): Property {
   return {
@@ -19,7 +19,7 @@ function mapApiProperty(item: any): Property {
     location: item.location || "Eneo halijatajwa",
     bedrooms: Number(item.bedrooms || 0),
     propertyType: item.property_type || item.propertyType || "house",
-    amenities: Array.isArray(item.amenities) ? item.amenities : [],
+    amenities: Array.isArray(item.features) ? item.features.map((f: any) => f.name) : Array.isArray(item.amenities) ? item.amenities : [],
     houseRules: Array.isArray(item.house_rules) ? item.house_rules : Array.isArray(item.houseRules) ? item.houseRules : [],
     images: normalizePropertyImages(item.images),
     status: item.status || "available",
@@ -33,12 +33,32 @@ const Properties = () => {
   const [location, setLocation] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [bedrooms, setBedrooms] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [availableFeatures, setAvailableFeatures] = useState<any[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<number[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const { data } = useQuery({
-    queryKey: ["public-properties"],
-    queryFn: () => propertiesApi.list(),
+    queryKey: ["public-properties", location, propertyType, bedrooms, minPrice, maxPrice, selectedFeatures],
+    queryFn: () => {
+      const params: Record<string, string> = {};
+      if (location) params.location = location;
+      if (propertyType) params.property_type = propertyType;
+      if (bedrooms) params.bedrooms = bedrooms;
+      if (minPrice) params.min_price = minPrice;
+      if (maxPrice) params.max_price = maxPrice;
+      if (selectedFeatures.length) params.features = selectedFeatures.join(",");
+      return propertiesApi.list(params);
+    },
   });
   const allProperties = (data || []).map(mapApiProperty);
+
+  // fetch master features
+  const { data: featuresData } = useQuery({
+    queryKey: ["features"],
+    queryFn: () => featuresApi.list(),
+    onSuccess: (d: any) => setAvailableFeatures(d || []),
+  });
 
   const filtered = allProperties.filter((p) => {
     if (location && !p.location.toLowerCase().includes(location.toLowerCase())) return false;
@@ -86,8 +106,26 @@ const Properties = () => {
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">{t("properties.priceRange") || "Price range"}</Label>
+            <div className="flex gap-2">
+              <Input placeholder={t("properties.min") || "Min"} value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
+              <Input placeholder={t("properties.max") || "Max"} value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
+            </div>
+          </div>
           <div className="col-span-2 flex items-end">
-            <Button variant="ghost" size="sm" onClick={() => { setPropertyType(""); setBedrooms(""); setLocation(""); }}>{t("properties.clearFilters")}</Button>
+            <Button variant="ghost" size="sm" onClick={() => { setPropertyType(""); setBedrooms(""); setLocation(""); setMinPrice(""); setMaxPrice(""); setSelectedFeatures([]); }}>{t("properties.clearFilters")}</Button>
+          </div>
+          <div className="col-span-4">
+            <Label className="text-xs">{t("properties.features") || "Features"}</Label>
+            <div className="grid grid-cols-3 gap-2 max-h-36 overflow-y-auto p-2 border rounded mt-2">
+              {(availableFeatures.length ? availableFeatures : []).map((f) => (
+                <label key={f.id} className="flex items-center space-x-2"><input type="checkbox" checked={selectedFeatures.includes(Number(f.id))} onChange={(e) => {
+                  if (e.target.checked) setSelectedFeatures(s => Array.from(new Set([...s, Number(f.id)])));
+                  else setSelectedFeatures(s => s.filter(id => id !== Number(f.id)));
+                }} /> <span className="text-sm">{f.name}</span></label>
+              ))}
+            </div>
           </div>
         </div>
       )}

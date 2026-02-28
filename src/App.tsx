@@ -19,6 +19,7 @@ import NotFound from "./pages/NotFound";
 import TenantApplications from "./pages/tenant/TenantApplications";
 import TenantViewings from "./pages/tenant/TenantViewings";
 import TenantLeases from "./pages/tenant/TenantLeases";
+import TenantOffers from "./pages/tenant/TenantOffers";
 import TenantPayments from "./pages/tenant/TenantPayments";
 import TenantInvoices from "./pages/tenant/TenantInvoices";
 import TenantMessages from "./pages/tenant/TenantMessages";
@@ -28,14 +29,17 @@ import LandlordProperties from "./pages/landlord/LandlordProperties";
 import LandlordViewings from "./pages/landlord/LandlordViewings";
 import LandlordApplications from "./pages/landlord/LandlordApplications";
 import LandlordLeases from "./pages/landlord/LandlordLeases";
+import LandlordOffers from "./pages/landlord/LandlordOffers";
 import LandlordPayments from "./pages/landlord/LandlordPayments";
 import LandlordInvoices from "./pages/landlord/LandlordInvoices";
 import LandlordMessages from "./pages/landlord/LandlordMessages";
+import LandlordVerification from "./pages/landlord/LandlordVerification";
 
 import AdminOverview from "./pages/admin/AdminOverview";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminProperties from "./pages/admin/AdminProperties";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminLifecycle from "./pages/admin/AdminLifecycle";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +71,7 @@ const App = () => (
                 <Route path="applications" element={<TenantApplications />} />
                 <Route path="viewings" element={<TenantViewings />} />
                 <Route path="leases" element={<TenantLeases />} />
+                <Route path="offers" element={<TenantOffers />} />
                 <Route path="payments" element={<TenantPayments />} />
                 <Route path="invoices" element={<TenantInvoices />} />
                 <Route path="messages" element={<TenantMessages />} />
@@ -76,7 +81,9 @@ const App = () => (
                 <Route path="properties/new" element={<LandlordProperties />} />
                 <Route path="landlord-viewings" element={<LandlordViewings />} />
                 <Route path="landlord-applications" element={<LandlordApplications />} />
+                <Route path="verification" element={<LandlordVerification />} />
                 <Route path="landlord-leases" element={<LandlordLeases />} />
+                <Route path="landlord-offers" element={<LandlordOffers />} />
                 <Route path="landlord-payments" element={<LandlordPayments />} />
                 <Route path="landlord-invoices" element={<LandlordInvoices />} />
                 <Route path="landlord-messages" element={<LandlordMessages />} />
@@ -94,6 +101,7 @@ const App = () => (
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="properties" element={<AdminProperties />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="lifecycle" element={<AdminLifecycle />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

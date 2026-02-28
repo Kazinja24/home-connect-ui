@@ -53,8 +53,7 @@ const LandlordApplications = () => {
   });
 
   const mutation = useMutation({
-    mutationFn: ({ id, action }: { id: string; action: "APPROVED" | "REJECTED" | "ACCEPTED" }) => {
-      if (action === "ACCEPTED") return appApi.accept(id);
+    mutationFn: ({ id, action }: { id: string; action: "approved" | "rejected" | "expired" }) => {
       return appApi.updateStatus(id, action);
     },
     onSuccess: () => {
@@ -96,14 +95,10 @@ const LandlordApplications = () => {
               <SelectTrigger><SelectValue placeholder="Status zote" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Status zote</SelectItem>
-                <SelectItem value="PENDING">PENDING</SelectItem>
-                <SelectItem value="APPROVED">APPROVED</SelectItem>
-                <SelectItem value="VIEWING_SCHEDULED">VIEWING_SCHEDULED</SelectItem>
-                <SelectItem value="ACCEPTED">ACCEPTED</SelectItem>
-                <SelectItem value="REJECTED">REJECTED</SelectItem>
-                <SelectItem value="LEASED">LEASED</SelectItem>
-                <SelectItem value="ACTIVE">ACTIVE</SelectItem>
-                <SelectItem value="CLOSED">CLOSED</SelectItem>
+                <SelectItem value="pending">PENDING</SelectItem>
+                <SelectItem value="approved">APPROVED</SelectItem>
+                <SelectItem value="rejected">REJECTED</SelectItem>
+                <SelectItem value="expired">EXPIRED</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -133,23 +128,23 @@ const LandlordApplications = () => {
                     Review Tenant Profile
                   </Button>
 
-                  {a.status === "PENDING" && (
+                  {String(a.status).toLowerCase() === "pending" && (
                     <>
-                      <Button size="sm" className="font-semibold shadow-sm" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: String(a.id), action: "APPROVED" })}>
+                      <Button size="sm" className="font-semibold shadow-sm" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: String(a.id), action: "approved" })}>
                         Approve
                       </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: String(a.id), action: "REJECTED" })}>
+                      <Button size="sm" variant="ghost" className="text-destructive" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: String(a.id), action: "rejected" })}>
                         Reject
                       </Button>
                     </>
                   )}
 
-                  {a.status === "VIEWING_SCHEDULED" && (
+                  {String(a.status).toLowerCase() === "approved" && (
                     <>
-                      <Button size="sm" className="font-semibold shadow-sm" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: String(a.id), action: "ACCEPTED" })}>
-                        Accept
+                      <Button size="sm" className="font-semibold shadow-sm" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: String(a.id), action: "expired" })}>
+                        Expire
                       </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: String(a.id), action: "REJECTED" })}>
+                      <Button size="sm" variant="ghost" className="text-destructive" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: String(a.id), action: "rejected" })}>
                         Reject
                       </Button>
                     </>
