@@ -557,6 +557,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "login.title": "Welcome back",
     "login.subtitle": "Sign in to your account",
     "login.email": "Email",
+    "login.phone": "Phone number",
     "login.password": "Password",
     "login.submit": "Sign In",
     "login.submitting": "Signing in…",

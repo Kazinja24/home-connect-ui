@@ -12,6 +12,7 @@ import authBg from "@/assets/auth-bg.jpg";
 
 const Login = () => {
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -52,8 +53,18 @@ const Login = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2"><Label htmlFor="email">{t("login.email")}</Label><Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-              <div className="space-y-2"><Label htmlFor="password">{t("login.password")}</Label><Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+              <div className="space-y-2">
+                <Label htmlFor="email">{t("login.email")}</Label>
+                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">{t("login.phone")}</Label>
+                <Input id="phone" type="tel" placeholder="+255 7XX XXX XXX" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">{t("login.password")}</Label>
+                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+              </div>
               <Button type="submit" className="w-full h-11 text-base font-semibold shadow-md" disabled={loading}>{loading ? t("login.submitting") : t("login.submit")}</Button>
             </form>
             <p className="mt-4 text-center text-sm text-muted-foreground">{t("login.noAccount")} <Link to="/register" className="text-primary font-medium hover:underline">{t("login.register")}</Link></p>
