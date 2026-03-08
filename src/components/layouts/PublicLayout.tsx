@@ -1,7 +1,7 @@
 import { Link, Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import nikonektiLogo from "@/assets/nikonekti-logo.png";
 
 export function PublicLayout() {
   const { t, lang, setLang } = useLanguage();
