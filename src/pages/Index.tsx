@@ -2,10 +2,11 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { PropertyCard } from "@/components/PropertyCard";
-import { Check, ChevronRight, Home, Shield } from "lucide-react";
+import { Check, ChevronRight, Shield } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { Property } from "@/types";
 import { normalizePropertyImages, properties as propertiesApi } from "@/lib/api";
+import heroBg from "@/assets/hero-dar.png";
 
 const Landing = () => {
   const { t } = useLanguage();
