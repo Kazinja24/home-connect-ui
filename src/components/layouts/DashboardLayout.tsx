@@ -30,6 +30,7 @@ export function DashboardLayout() {
     ],
     landlord: [
       { title: t("profile.title"), url: "/dashboard/profile", icon: UserCircle },
+      { title: t("landlord.overview"), url: "/dashboard/overview", icon: Home },
       { title: t("landlord.properties"), url: "/dashboard/properties", icon: Building2 },
       { title: t("landlord.applications"), url: "/dashboard/landlord-applications", icon: ClipboardList },
       { title: t("landlord.viewings"), url: "/dashboard/landlord-viewings", icon: Eye },

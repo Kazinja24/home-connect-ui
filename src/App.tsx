@@ -63,6 +63,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
+        <Route path="profile" element={<Profile />} />
         <Route path="applications" element={<TenantApplications />} />
         <Route path="viewings" element={<TenantViewings />} />
         <Route path="leases" element={<TenantLeases />} />
