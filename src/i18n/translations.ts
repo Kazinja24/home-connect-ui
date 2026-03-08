@@ -386,7 +386,7 @@ const translations: Record<Lang, Record<string, string>> = {
 
   en: {
     // Nav & general
-    "app.name": "NIKONEKTI",
+    "app.name": "Kodi",
     "nav.browse": "Browse Properties",
     "nav.login": "Log In",
     "nav.register": "Get Started",
