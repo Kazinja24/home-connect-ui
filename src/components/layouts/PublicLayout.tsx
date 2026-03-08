@@ -16,7 +16,7 @@ export function PublicLayout() {
             <div className="flex items-center justify-center">
               <Home className="h-5 w-5 text-primary" strokeWidth={1.5} />
             </div>
-            <span className="font-bold text-xl text-primary tracking-tight">Kodi</span>
+            <span className="font-bold text-xl text-primary tracking-tight">Nikonekti</span>
           </Link>
 
           {/* Right side */}
