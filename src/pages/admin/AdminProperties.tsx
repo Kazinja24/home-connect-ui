@@ -1,17 +1,34 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { properties as propertiesApi } from "@/lib/api";
+import { properties as propertiesApi, normalizePropertyImages } from "@/lib/api";
+import { CheckCircle, XCircle, Eye, AlertTriangle, Shield } from "lucide-react";
+
+const REVIEW_CHECKLIST = [
+  { id: "photos_real", label: "Picha ni halisi na zinaonyesha nyumba vizuri", labelEn: "Photos are real and show the property clearly" },
+  { id: "location_plausible", label: "Eneo linaonekana sahihi na lipo", labelEn: "Location appears plausible and exists" },
+  { id: "pricing_fair", label: "Bei inafanana na eneo na aina ya nyumba", labelEn: "Pricing is consistent with area and property type" },
+  { id: "description_accurate", label: "Maelezo yanafanana na picha", labelEn: "Description matches the photos" },
+  { id: "no_suspicious", label: "Hakuna ishara za udanganyifu", labelEn: "No signs of fraud or suspicious content" },
+];
 
 const AdminProperties = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [reviewProperty, setReviewProperty] = useState<any>(null);
+  const [checklist, setChecklist] = useState<Record<string, boolean>>({});
+  const [feedbackNote, setFeedbackNote] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-properties"],
@@ -23,115 +40,170 @@ const AdminProperties = () => {
     queryFn: propertiesApi.pendingReviews,
   });
 
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-properties"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-properties-pending-review"] });
+  };
+
   const approveListing = useMutation({
-    mutationFn: (id: string) => propertiesApi.adminApproveListing(id),
+    mutationFn: (id: string) => propertiesApi.adminApproveListing(id, feedbackNote),
     onSuccess: () => {
-      toast({ title: "Listing approved and published." });
-      queryClient.invalidateQueries({ queryKey: ["admin-properties"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-properties-pending-review"] });
+      toast({ title: "Orodha imekubaliwa na kuchapishwa." });
+      invalidateAll();
+      closeReview();
     },
-    onError: (err: any) => toast({ title: err.message || "Approval failed", variant: "destructive" }),
+    onError: (err: any) => toast({ title: err.message || "Imeshindikana", variant: "destructive" }),
   });
 
   const rejectListing = useMutation({
-    mutationFn: (id: string) => propertiesApi.adminRejectListing(id),
+    mutationFn: (id: string) => propertiesApi.adminRejectListing(id, feedbackNote),
     onSuccess: () => {
-      toast({ title: "Listing rejected." });
-      queryClient.invalidateQueries({ queryKey: ["admin-properties"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-properties-pending-review"] });
+      toast({ title: "Orodha imekataliwa. Mmiliki ataarifiwa." });
+      invalidateAll();
+      closeReview();
     },
-    onError: (err: any) => toast({ title: err.message || "Rejection failed", variant: "destructive" }),
+    onError: (err: any) => toast({ title: err.message || "Imeshindikana", variant: "destructive" }),
   });
 
   const approveVerification = useMutation({
     mutationFn: (id: string) => propertiesApi.approveVerification(id),
-    onSuccess: () => {
-      toast({ title: "Ownership verification approved." });
-      queryClient.invalidateQueries({ queryKey: ["admin-properties"] });
-    },
-    onError: (err: any) => toast({ title: err.message || "Verification approval failed", variant: "destructive" }),
+    onSuccess: () => { toast({ title: "Uthibitisho umekubaliwa." }); invalidateAll(); },
   });
 
   const rejectVerification = useMutation({
     mutationFn: (id: string) => propertiesApi.rejectVerification(id),
-    onSuccess: () => {
-      toast({ title: "Ownership verification rejected." });
-      queryClient.invalidateQueries({ queryKey: ["admin-properties"] });
-    },
-    onError: (err: any) => toast({ title: err.message || "Verification rejection failed", variant: "destructive" }),
+    onSuccess: () => { toast({ title: "Uthibitisho umekataliwa." }); invalidateAll(); },
   });
 
+  const openReview = (p: any) => {
+    setReviewProperty(p);
+    setChecklist({});
+    setFeedbackNote("");
+  };
+
+  const closeReview = () => {
+    setReviewProperty(null);
+    setChecklist({});
+    setFeedbackNote("");
+  };
+
+  const allChecked = REVIEW_CHECKLIST.every(item => checklist[item.id]);
   const pendingReviewIds = new Set((pendingReview || []).map((p: any) => String(p.id)));
+
+  const pendingItems = (data || []).filter((p: any) => pendingReviewIds.has(String(p.id)));
+  const otherItems = (data || []).filter((p: any) => !pendingReviewIds.has(String(p.id)));
 
   return (
     <div className="space-y-6 animate-slide-up">
       <h1 className="text-2xl font-bold text-foreground">{t("admin.propertyManagement")}</h1>
+
+      {/* Pending Review Section */}
+      {pendingItems.length > 0 && (
+        <Card className="border-accent/30 bg-accent/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Shield className="h-5 w-5 text-accent" />
+              Zinazosubiri Ukaguzi ({pendingItems.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nyumba</TableHead>
+                  <TableHead>Mmiliki</TableHead>
+                  <TableHead>Eneo</TableHead>
+                  <TableHead>Kodi</TableHead>
+                  <TableHead>Picha</TableHead>
+                  <TableHead className="text-right">Kagua</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pendingItems.map((p: any) => (
+                  <TableRow key={p.id} className="hover:bg-accent/5 transition-colors">
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{p.title}</p>
+                        <p className="text-xs text-muted-foreground">{p.property_type}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm">{p.owner_name || `#${p.owner}`}</TableCell>
+                    <TableCell className="text-sm">{p.location}</TableCell>
+                    <TableCell className="font-medium text-sm">TZS {Number(p.price).toLocaleString()}</TableCell>
+                    <TableCell>
+                      {p.images?.length > 0 ? (
+                        <img src={normalizePropertyImages(p.images)[0]} alt="" className="h-10 w-16 object-cover rounded" />
+                      ) : <span className="text-xs text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" onClick={() => openReview(p)} className="gap-1">
+                        <Eye className="h-3.5 w-3.5" /> Kagua
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* All Properties */}
       <Card className="glass-strong border-border/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Nyumba Zote</CardTitle>
+        </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-6 space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+            <div className="p-6 space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full" />)}</div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("common.property")}</TableHead>
-                  <TableHead>{t("admin.owner")}</TableHead>
-                  <TableHead>Verification</TableHead>
-                  <TableHead>Listing</TableHead>
+                  <TableHead>Nyumba</TableHead>
+                  <TableHead>Mmiliki</TableHead>
+                  <TableHead>Uthibitisho</TableHead>
+                  <TableHead>Orodha</TableHead>
                   <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data && data.length > 0 ? (
-                  data.map((p: any) => (
-                    <TableRow key={p.id} className="hover:bg-muted/50 transition-colors">
-                      <TableCell className="font-medium">
-                        {p.title}
-                        {pendingReviewIds.has(String(p.id)) ? (
-                          <Badge variant="secondary" className="ml-2 text-[10px]">pending review</Badge>
-                        ) : null}
-                      </TableCell>
-                      <TableCell>{p.owner_name || p.owner_email || `Landlord #${p.owner}`}</TableCell>
-                      <TableCell>
-                        <Badge variant={p.verification_status === "approved" ? "default" : p.verification_status === "rejected" ? "destructive" : "secondary"}>
-                          {p.verification_status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={p.listing_status === "published" ? "default" : p.listing_status === "rejected" ? "destructive" : "secondary"}>
-                          {p.listing_status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right space-x-1">
-                        {p.verification_status !== "approved" ? (
-                          <Button size="sm" variant="outline" onClick={() => approveVerification.mutate(String(p.id))}>
-                            Verify
-                          </Button>
-                        ) : null}
-                        {p.verification_status !== "rejected" ? (
-                          <Button size="sm" variant="ghost" className="text-destructive" onClick={() => rejectVerification.mutate(String(p.id))}>
-                            Reject Verify
-                          </Button>
-                        ) : null}
-
-                        {pendingReviewIds.has(String(p.id)) ? (
-                          <>
-                            <Button size="sm" onClick={() => approveListing.mutate(String(p.id))}>
-                              Approve Listing
-                            </Button>
-                            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => rejectListing.mutate(String(p.id))}>
-                              Reject Listing
-                            </Button>
-                          </>
-                        ) : null}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                      No properties found.
+                {data && data.length > 0 ? data.map((p: any) => (
+                  <TableRow key={p.id} className="hover:bg-muted/50 transition-colors">
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{p.title}</p>
+                        <p className="text-xs text-muted-foreground">{p.location}</p>
+                      </div>
                     </TableCell>
+                    <TableCell className="text-sm">{p.owner_name || `#${p.owner}`}</TableCell>
+                    <TableCell>
+                      <Badge variant={p.verification_status === "verified" ? "default" : p.verification_status === "rejected" ? "destructive" : "secondary"}>
+                        {p.verification_status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={p.listing_status === "published" ? "default" : p.listing_status === "rejected" ? "destructive" : "secondary"}>
+                        {p.listing_status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right space-x-1">
+                      {p.verification_status !== "verified" && (
+                        <>
+                          <Button size="sm" variant="outline" onClick={() => approveVerification.mutate(String(p.id))}>Thibitisha</Button>
+                          <Button size="sm" variant="ghost" className="text-destructive" onClick={() => rejectVerification.mutate(String(p.id))}>Kataa</Button>
+                        </>
+                      )}
+                      {pendingReviewIds.has(String(p.id)) && (
+                        <Button size="sm" onClick={() => openReview(p)} className="gap-1">
+                          <Eye className="h-3.5 w-3.5" /> Kagua
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">Hakuna nyumba.</TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -139,9 +211,107 @@ const AdminProperties = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Review Dialog */}
+      <Dialog open={!!reviewProperty} onOpenChange={(o) => { if (!o) closeReview(); }}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-primary" />
+              Kagua Orodha
+            </DialogTitle>
+          </DialogHeader>
+
+          {reviewProperty && (
+            <div className="space-y-5">
+              {/* Property summary */}
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <h3 className="font-semibold text-foreground">{reviewProperty.title}</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div><span className="text-muted-foreground">Aina:</span> {reviewProperty.property_type}</div>
+                  <div><span className="text-muted-foreground">Kodi:</span> TZS {Number(reviewProperty.price).toLocaleString()}/mwezi</div>
+                  <div className="col-span-2"><span className="text-muted-foreground">Eneo:</span> {reviewProperty.location}</div>
+                  <div className="col-span-2"><span className="text-muted-foreground">Mmiliki:</span> {reviewProperty.owner_name || `#${reviewProperty.owner}`}</div>
+                </div>
+                {reviewProperty.description && (
+                  <p className="text-sm text-muted-foreground mt-2">{reviewProperty.description}</p>
+                )}
+                {/* Photos */}
+                {reviewProperty.images?.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    {normalizePropertyImages(reviewProperty.images).map((src, i) => (
+                      <img key={i} src={src} alt="" className="w-full aspect-video object-cover rounded border border-border" />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Review checklist */}
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold">Orodha ya Ukaguzi</Label>
+                {REVIEW_CHECKLIST.map(item => (
+                  <label key={item.id} className="flex items-start gap-3 cursor-pointer p-2 rounded hover:bg-muted/50 transition-colors">
+                    <Checkbox
+                      checked={!!checklist[item.id]}
+                      onCheckedChange={(checked) => setChecklist(c => ({ ...c, [item.id]: !!checked }))}
+                      className="mt-0.5"
+                    />
+                    <span className="text-sm">{lang === "sw" ? item.label : item.labelEn}</span>
+                  </label>
+                ))}
+              </div>
+
+              {/* Feedback / notes */}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Maoni kwa Mmiliki</Label>
+                <Textarea
+                  placeholder="Andika maoni au sababu ya kukataa…"
+                  value={feedbackNote}
+                  onChange={(e) => setFeedbackNote(e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              {/* Warning if not all checked */}
+              {!allChecked && (
+                <div className="flex items-center gap-2 text-sm text-warning bg-warning/10 rounded-lg p-3">
+                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                  Tafadhali kamilisha orodha ya ukaguzi kabla ya kukubali
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1 gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
+                  onClick={() => {
+                    if (!feedbackNote.trim()) {
+                      toast({ title: "Tafadhali andika sababu ya kukataa", variant: "destructive" });
+                      return;
+                    }
+                    rejectListing.mutate(String(reviewProperty.id));
+                  }}
+                  disabled={rejectListing.isPending}
+                >
+                  <XCircle className="h-4 w-4" />
+                  {rejectListing.isPending ? "Inakataa…" : "Kataa"}
+                </Button>
+                <Button
+                  className="flex-1 gap-2"
+                  onClick={() => approveListing.mutate(String(reviewProperty.id))}
+                  disabled={!allChecked || approveListing.isPending}
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  {approveListing.isPending ? "Inakubali…" : "Kubali & Chapisha"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
 export default AdminProperties;
-
