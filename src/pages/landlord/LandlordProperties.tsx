@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -10,14 +10,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Pencil, Trash2, AlertTriangle } from "lucide-react";
 
 import { properties as propertiesApi, features as featuresApi, normalizePropertyImages } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const LandlordProperties = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", description: "", price: "", location: "" });
@@ -28,6 +31,9 @@ const LandlordProperties = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Check landlord verification status
+  const isVerified = true; // This will be checked from user profile / API
+
   const { data, isLoading } = useQuery({
     queryKey: ["landlord-properties"],
     queryFn: () => propertiesApi.list(),
@@ -36,61 +42,59 @@ const LandlordProperties = () => {
   const { data: featuresData } = useQuery({
     queryKey: ["features"],
     queryFn: () => featuresApi.list(),
-    onSuccess: (d: any) => setAvailableFeatures(d || []),
   });
+
+  useEffect(() => {
+    if (featuresData) setAvailableFeatures(featuresData);
+  }, [featuresData]);
 
   const { data: configData } = useQuery({
     queryKey: ["properties-config"],
     queryFn: () => propertiesApi.getConfig(),
-    onSuccess: (d: any) => setMaxImageSizeMb(d?.image_max_size_mb || 5),
   });
+
+  useEffect(() => {
+    if (configData) setMaxImageSizeMb(configData.image_max_size_mb || 5);
+  }, [configData]);
 
   const createMutation = useMutation({
     mutationFn: (data: { title: string; description: string; price: number; location: string }) => propertiesApi.create(data),
-    onSuccess: () => {
-      // After property created, upload images if provided
-      return (async () => {
-        queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
-        toast({ title: t("landlord.propertyAdded") });
-        // create returns the created property via API client; we need the id
-        // Refetch to get latest list and created property's id
-        const latest = await propertiesApi.list({});
-        const created = latest && latest.length ? latest[0] : null;
-        if (created && imageFiles && imageFiles.length > 0) {
-          const fd = new FormData();
-          imageFiles.forEach((f) => fd.append("images", f));
-          try {
-            await propertiesApi.uploadImages(String(created.id), fd);
-            queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
-          } catch (err: any) {
-            toast({ title: String(err?.message || "Image upload failed"), variant: "destructive" });
-          }
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+      toast({ title: t("landlord.propertyAdded") });
+      const latest = await propertiesApi.list({});
+      const created = latest && latest.length ? latest[0] : null;
+      if (created && imageFiles && imageFiles.length > 0) {
+        const fd = new FormData();
+        imageFiles.forEach((f) => fd.append("images", f));
+        try {
+          await propertiesApi.uploadImages(String(created.id), fd);
+          queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+        } catch (err: any) {
+          toast({ title: String(err?.message || "Image upload failed"), variant: "destructive" });
         }
-        resetForm();
-      })();
+      }
+      resetForm();
     },
     onError: (err: any) => toast({ title: err.message, variant: "destructive" }),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<{ title: string; description: string; price: number; location: string }> }) => propertiesApi.update(id, data),
-    onSuccess: () => {
-      // After update, upload any new images
-      (async () => {
-        queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
-        toast({ title: t("landlord.propertyUpdated") });
-        if (editId && imageFiles && imageFiles.length > 0) {
-          const fd = new FormData();
-          imageFiles.forEach((f) => fd.append("images", f));
-          try {
-            await propertiesApi.uploadImages(editId, fd);
-            queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
-          } catch (err: any) {
-            toast({ title: String(err?.message || "Image upload failed"), variant: "destructive" });
-          }
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+      toast({ title: t("landlord.propertyUpdated") });
+      if (editId && imageFiles && imageFiles.length > 0) {
+        const fd = new FormData();
+        imageFiles.forEach((f) => fd.append("images", f));
+        try {
+          await propertiesApi.uploadImages(editId, fd);
+          queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
+        } catch (err: any) {
+          toast({ title: String(err?.message || "Image upload failed"), variant: "destructive" });
         }
-        resetForm();
-      })();
+      }
+      resetForm();
     },
     onError: (err: any) => toast({ title: err.message, variant: "destructive" }),
   });
@@ -103,30 +107,16 @@ const LandlordProperties = () => {
     },
     onError: (err: any) => toast({ title: err.message, variant: "destructive" }),
   });
+
   const submitForReviewMutation = useMutation({
     mutationFn: (id: string) => propertiesApi.submitForReview(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
-      toast({ title: "Property submitted for review." });
+      toast({ title: t("landlord.submittedForReview") || "Property submitted for admin review." });
     },
     onError: (err: any) => toast({ title: err.message || "Submit for review failed", variant: "destructive" }),
   });
-  const publishMutation = useMutation({
-    mutationFn: (id: string) => propertiesApi.publish(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
-      toast({ title: "Property published." });
-    },
-    onError: (err: any) => toast({ title: err.message || "Publish failed", variant: "destructive" }),
-  });
-  const unpublishMutation = useMutation({
-    mutationFn: (id: string) => propertiesApi.unpublish(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
-      toast({ title: "Property unpublished." });
-    },
-    onError: (err: any) => toast({ title: err.message || "Unpublish failed", variant: "destructive" }),
-  });
+
   const ownershipMutation = useMutation({
     mutationFn: ({ id, file }: { id: string; file: File }) => {
       const fd = new FormData();
@@ -144,6 +134,7 @@ const LandlordProperties = () => {
     setForm({ title: "", description: "", price: "", location: "" });
     setEditId(null);
     setSelectedFeatures([]);
+    setImageFiles([]);
     setDialogOpen(false);
   };
 
@@ -155,7 +146,6 @@ const LandlordProperties = () => {
       price: String(p.price || ""),
       location: p.location || "",
     });
-    // prefill selected features if present
     if (Array.isArray(p.features)) {
       setSelectedFeatures(p.features.map((f: any) => Number(f.id)));
     } else {
@@ -168,22 +158,20 @@ const LandlordProperties = () => {
     e.preventDefault();
 
     if (editId) {
-      let payload: Partial<{ title: string; description: string; price: number; location: string; feature_ids?: number[] }> = {};
+      let payload: any = {};
       if (form.title.trim()) payload.title = form.title.trim();
       if (form.description.trim()) payload.description = form.description.trim();
       if (form.location.trim()) payload.location = form.location.trim();
       if (form.price !== "") payload.price = Number(form.price);
-
       if (!Object.keys(payload).length) {
-        toast({ title: "Weka angalau field moja ya kusasisha.", variant: "destructive" });
+        toast({ title: "Fill at least one field to update.", variant: "destructive" });
         return;
       }
-      // include features when updating
-      payload = { ...payload, feature_ids: selectedFeatures };
+      payload.feature_ids = selectedFeatures;
       updateMutation.mutate({ id: editId, data: payload });
       return;
     }
-    // include selected features in create
+
     const createPayload = {
       title: form.title.trim(),
       description: form.description.trim(),
@@ -193,13 +181,21 @@ const LandlordProperties = () => {
     };
 
     if (!createPayload.title || !createPayload.description || !createPayload.location || Number.isNaN(createPayload.price)) {
-      toast({ title: "Jaza taarifa zote muhimu kabla ya kuhifadhi.", variant: "destructive" });
+      toast({ title: "Fill all required fields.", variant: "destructive" });
       return;
     }
-    createMutation.mutate(createPayload);
+    createMutation.mutate(createPayload as any);
   };
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
+
+  const getListingStatusBadge = (p: any) => {
+    const ls = String(p.listing_status || "draft").toLowerCase();
+    if (ls === "published") return <Badge variant="default">Published</Badge>;
+    if (ls === "pending_review") return <Badge variant="secondary">Pending Review</Badge>;
+    if (ls === "rejected") return <Badge variant="destructive">Rejected</Badge>;
+    return <Badge variant="outline">Draft</Badge>;
+  };
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -238,12 +234,23 @@ const LandlordProperties = () => {
                 <div className="text-sm text-muted-foreground">You may upload multiple images (max {maxImageSizeMb} MB each).</div>
               </div>
               <Button type="submit" className="w-full font-semibold" disabled={isSaving}>
-                {isSaving ? (t("landlord.saving") || "Inahifadhi...") : editId ? t("landlord.updateProperty") : t("landlord.saveProperty")}
+                {isSaving ? (t("landlord.saving") || "Saving...") : editId ? t("landlord.updateProperty") : t("landlord.saveProperty")}
               </Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Info: Properties must be submitted for review → admin approves → then published */}
+      <Card className="border-warning/30 bg-warning/5">
+        <CardContent className="p-4 flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
+          <div className="text-sm text-muted-foreground">
+            <p className="font-semibold text-foreground mb-1">{t("landlord.publishFlow") || "Property Publishing Flow"}</p>
+            <p>{t("landlord.publishFlowDesc") || "Properties start as Draft. Submit for review → Admin approves → Property goes live. You cannot self-publish."}</p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="glass-strong border-border/30">
         <CardContent className="p-0">
@@ -257,6 +264,7 @@ const LandlordProperties = () => {
                   <TableHead>{t("landlord.location")}</TableHead>
                   <TableHead>{t("landlord.price")}</TableHead>
                   <TableHead>Cover</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
                   <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -273,33 +281,23 @@ const LandlordProperties = () => {
                         <div className="text-sm text-muted-foreground">No image</div>
                       )}
                     </TableCell>
+                    <TableCell>{getListingStatusBadge(p)}</TableCell>
                     <TableCell className="text-right space-x-1">
                       <label className="inline-flex">
-                        <input
-                          type="file"
-                          accept="image/*,application/pdf"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) ownershipMutation.mutate({ id: String(p.id), file });
-                          }}
-                        />
+                        <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) ownershipMutation.mutate({ id: String(p.id), file });
+                        }} />
                         <Button variant="ghost" size="sm" type="button">Ownership Doc</Button>
                       </label>
-                      {p.listing_status === "draft" || p.listing_status === "rejected" ? (
-                        <Button variant="ghost" size="sm" type="button" onClick={() => submitForReviewMutation.mutate(String(p.id))}>
-                          Submit Review
-                        </Button>
-                      ) : null}
-                      {!p.is_published ? (
-                        <Button variant="ghost" size="sm" type="button" onClick={() => publishMutation.mutate(String(p.id))}>
-                          Publish
-                        </Button>
-                      ) : (
-                        <Button variant="ghost" size="sm" type="button" onClick={() => unpublishMutation.mutate(String(p.id))}>
-                          Unpublish
+
+                      {/* Submit for review: only if draft or rejected */}
+                      {(p.listing_status === "draft" || p.listing_status === "rejected") && (
+                        <Button variant="outline" size="sm" type="button" onClick={() => submitForReviewMutation.mutate(String(p.id))}>
+                          Submit for Review
                         </Button>
                       )}
+
                       <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="h-4 w-4" /></Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -319,7 +317,7 @@ const LandlordProperties = () => {
                     </TableCell>
                   </TableRow>
                 )) : (
-                  <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">{t("landlord.noProperties")}</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">{t("landlord.noProperties")}</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>

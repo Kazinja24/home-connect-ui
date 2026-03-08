@@ -21,7 +21,9 @@ const AdminLifecycle = () => {
     queryKey: ["admin-lifecycle-audit", filters],
     queryFn: () => auditApi.lifecycle(filters),
   });
-  const rows = Array.isArray(data) ? data : data?.results || [];
+
+  const rawData = data as any;
+  const rows: any[] = Array.isArray(rawData) ? rawData : (rawData?.results || []);
 
   return (
     <div className="space-y-6 animate-slide-up">
