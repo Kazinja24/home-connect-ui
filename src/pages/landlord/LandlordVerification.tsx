@@ -82,7 +82,7 @@ const LandlordVerification: React.FC = () => {
                   </label>
                 </div>
               </div>
-              <Button type="submit" disabled={mutation.isPending || !identity || !supporting} className="font-semibold">
+              <Button type="submit" disabled={mutation.isPending || !identity || !selfie || !supporting} className="font-semibold">
                 {mutation.isPending ? (t("common.loading") || "Submitting...") : (t("common.submit") || "Submit for Verification")}
               </Button>
               {mutation.isError && (
