@@ -3,7 +3,7 @@ import { useVerificationSubmit } from '@/hooks/useVerification';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { AlertTriangle, CheckCircle, Upload } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Upload, Camera } from 'lucide-react';
 import { useLanguage } from '@/i18n/LanguageContext';
 
 const LandlordVerification: React.FC = () => {
