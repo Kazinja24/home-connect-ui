@@ -93,6 +93,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
+        <Route path="profile" element={<Profile />} />
         <Route path="overview" element={<AdminOverview />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="properties" element={<AdminProperties />} />
