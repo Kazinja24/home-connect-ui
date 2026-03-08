@@ -38,7 +38,7 @@ export const mockAuth = {
     else if (email.includes("admin")) user = mockUsers.admin;
     else user = { ...mockUsers.tenant, email };
 
-    localStorage.setItem("kodi_mock_user", JSON.stringify(user));
+    localStorage.setItem("nikonekti_mock_user", JSON.stringify(user));
     return { access: "mock-token-xyz", refresh: "mock-refresh-xyz", user };
   },
 
