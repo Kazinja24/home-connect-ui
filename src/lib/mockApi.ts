@@ -21,7 +21,7 @@ const delay = (ms = 300) => new Promise((r) => setTimeout(r, ms));
 
 // Track current mock user role from localStorage
 function getCurrentMockUser() {
-  const stored = localStorage.getItem("nikonekti_mock_user");
+  const stored = localStorage.getItem("kodi_mock_user");
   if (stored) {
     try { return JSON.parse(stored); } catch { /* ignore */ }
   }
