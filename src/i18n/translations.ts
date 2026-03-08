@@ -519,7 +519,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "footer.company": "Company",
     "footer.about": "About",
     "footer.contact": "Contact",
-    "footer.copyright": "© 2026 NIKONEKTI. All rights reserved.",
+    "footer.copyright": "© 2026 Kodi. All rights reserved.",
 
     // Properties page
     "properties.title": "Browse Properties",
