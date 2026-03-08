@@ -13,7 +13,7 @@ export function PublicLayout() {
         <div className="container flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src={nikonektiLogo} alt="Nikonekti" className="h-8 w-auto" />
+            <img src={nikonektiLogo} alt="NIKONEKTI" className="h-8 w-auto" />
             <span className="font-bold text-xl text-primary tracking-tight">NIKONEKTI</span>
           </Link>
 
