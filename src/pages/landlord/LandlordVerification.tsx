@@ -63,6 +63,16 @@ const LandlordVerification: React.FC = () => {
                 </div>
               </div>
               <div className="space-y-2">
+                <Label>{t("landlord.selfiePhoto") || "Selfie Photo"}</Label>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                    <Camera className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{selfie ? selfie.name : (t("landlord.takeSelfie") || "Take selfie")}</span>
+                    <input type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => setSelfie(e.target.files?.[0] ?? null)} />
+                  </label>
+                </div>
+              </div>
+              <div className="space-y-2">
                 <Label>{t("landlord.supportingDoc") || "Supporting Document"}</Label>
                 <div className="flex items-center gap-3">
                   <label className="flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
