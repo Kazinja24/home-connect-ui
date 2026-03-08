@@ -3,7 +3,7 @@ export type Lang = "sw" | "en";
 const translations: Record<Lang, Record<string, string>> = {
   sw: {
     // Nav & general
-    "app.name": "NIKONEKTI",
+    "app.name": "Kodi",
     "nav.browse": "Vinjari Nyumba",
     "nav.login": "Ingia",
     "nav.register": "Anza Sasa",
@@ -84,7 +84,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.badge": "Jukwaa #1 la Kukodisha Tanzania",
     "landing.title1": "Pata nyumba yako",
     "landing.title2": "kwa urahisi",
-    "landing.subtitle": "NIKONEKTI inaunganisha wapangaji na wamiliki kwenye jukwaa moja la kuaminika. Tafuta, omba, na kodisha — yote sehemu moja.",
+    "landing.subtitle": "Kodi inaunganisha wapangaji na wamiliki kwenye jukwaa moja la kuaminika. Tafuta, omba, na kodisha — yote sehemu moja.",
     "landing.searchPlaceholder": "Tafuta vyumba, nyumba, au maeneo…",
     "landing.search": "Tafuta",
     "landing.properties": "Nyumba",
@@ -106,7 +106,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.featuredSub": "Zilizochaguliwa kwako",
     "landing.viewAll": "Tazama zote",
     "landing.benefits": "Faida",
-    "landing.whyNikonekti": "Kwa nini NIKONEKTI?",
+    "landing.whyNikonekti": "Kwa nini Kodi?",
     "landing.forTenants": "Kwa Wapangaji",
     "landing.forLandlords": "Kwa Wamiliki",
     "landing.tenant1": "Vinjari orodha zilizothibitishwa na picha halisi",
@@ -118,7 +118,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.landlord3": "Kagua maombi na taarifa za wapangaji",
     "landing.landlord4": "Tengeneza na uchapishie mikataba ya kukodisha",
     "landing.ctaTitle": "Uko tayari kuanza?",
-    "landing.ctaSub": "Jiunge na maelfu ya wapangaji na wamiliki kwenye NIKONEKTI.",
+    "landing.ctaSub": "Jiunge na maelfu ya wapangaji na wamiliki kwenye Kodi.",
     "landing.registerTenant": "Jisajili kama Mpangaji",
     "landing.registerLandlord": "Jisajili kama Mmiliki",
     "landing.available": "Inapatikana",
@@ -136,7 +136,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "footer.company": "Kampuni",
     "footer.about": "Kuhusu",
     "footer.contact": "Wasiliana",
-    "footer.copyright": "© 2026 NIKONEKTI. Haki zote zimehifadhiwa.",
+    "footer.copyright": "© 2026 Kodi. Haki zote zimehifadhiwa.",
 
     // Properties page
     "properties.title": "Vinjari Nyumba",
@@ -386,7 +386,7 @@ const translations: Record<Lang, Record<string, string>> = {
 
   en: {
     // Nav & general
-    "app.name": "NIKONEKTI",
+    "app.name": "Kodi",
     "nav.browse": "Browse Properties",
     "nav.login": "Log In",
     "nav.register": "Get Started",
@@ -467,7 +467,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.badge": "#1 Rental Platform in Tanzania",
     "landing.title1": "Find your home",
     "landing.title2": "with ease",
-    "landing.subtitle": "NIKONEKTI connects tenants and landlords on a single trusted platform. Search, apply, and rent — all in one place.",
+    "landing.subtitle": "Kodi connects tenants and landlords on a single trusted platform. Search, apply, and rent — all in one place.",
     "landing.searchPlaceholder": "Search rooms, houses, or locations…",
     "landing.search": "Search",
     "landing.properties": "Properties",
@@ -489,7 +489,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.featuredSub": "Handpicked for you",
     "landing.viewAll": "View all",
     "landing.benefits": "Benefits",
-    "landing.whyNikonekti": "Why NIKONEKTI?",
+    "landing.whyNikonekti": "Why Kodi?",
     "landing.forTenants": "For Tenants",
     "landing.forLandlords": "For Landlords",
     "landing.tenant1": "Browse verified listings with real photos",
@@ -501,7 +501,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.landlord3": "Review applications and tenant information",
     "landing.landlord4": "Create and publish lease agreements",
     "landing.ctaTitle": "Ready to get started?",
-    "landing.ctaSub": "Join thousands of tenants and landlords on NIKONEKTI.",
+    "landing.ctaSub": "Join thousands of tenants and landlords on Kodi.",
     "landing.registerTenant": "Sign up as Tenant",
     "landing.registerLandlord": "Sign up as Landlord",
     "landing.available": "Available",
@@ -519,7 +519,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "footer.company": "Company",
     "footer.about": "About",
     "footer.contact": "Contact",
-    "footer.copyright": "© 2026 NIKONEKTI. All rights reserved.",
+    "footer.copyright": "© 2026 Kodi. All rights reserved.",
 
     // Properties page
     "properties.title": "Browse Properties",

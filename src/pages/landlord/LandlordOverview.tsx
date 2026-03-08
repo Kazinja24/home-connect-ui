@@ -1,10 +1,12 @@
 import { StatCard } from "@/components/StatCard";
-import { Building2, Eye, ClipboardList } from "lucide-react";
+import { Building2, Eye, ClipboardList, Plus } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { applications as applicationsApi, auth as authApi, viewings as viewingsApi } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActiveTenantsList } from "@/components/ActiveTenantsList";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const LandlordOverview = () => {
   const { t } = useLanguage();
@@ -29,14 +31,25 @@ const LandlordOverview = () => {
   const isLoading = dashboardLoading || applicationsLoading || viewingsLoading;
 
   return (
-    <div className="space-y-6 animate-slide-up">
-      <h1 className="text-2xl font-bold text-foreground">{t("landlord.overview")}</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 stagger-children">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">{t("landlord.overview")}</h1>
+        <Button asChild className="rounded bg-primary text-primary-foreground hover:bg-primary/90">
+          <Link to="/dashboard/properties/new">
+            <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
+            Ongeza Orodha
+          </Link>
+        </Button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {isLoading ? (
           <>
-            <Skeleton className="h-28 w-full rounded-xl" />
-            <Skeleton className="h-28 w-full rounded-xl" />
-            <Skeleton className="h-28 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-lg" />
+            <Skeleton className="h-24 w-full rounded-lg" />
+            <Skeleton className="h-24 w-full rounded-lg" />
           </>
         ) : (
           <>
@@ -47,6 +60,7 @@ const LandlordOverview = () => {
         )}
       </div>
 
+      {/* Active Tenants */}
       <ActiveTenantsList />
     </div>
   );

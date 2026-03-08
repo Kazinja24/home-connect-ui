@@ -16,6 +16,7 @@ import Properties from "./pages/Properties";
 import PropertyDetails from "./pages/PropertyDetails";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
+import Agreement from "./pages/Agreement";
 
 import TenantApplications from "./pages/tenant/TenantApplications";
 import TenantViewings from "./pages/tenant/TenantViewings";
@@ -54,6 +55,7 @@ function AppRoutes() {
       </Route>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/agreement" element={<Agreement />} />
 
       <Route
         path="/dashboard"

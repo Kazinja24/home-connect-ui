@@ -5,13 +5,10 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import authBg from "@/assets/auth-bg.jpg";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,56 +17,97 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // For prototype, also support email login
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) { toast({ title: t("login.fillAll"), variant: "destructive" }); return; }
+    if (!phone || !password) { 
+      toast({ title: t("login.fillAll"), variant: "destructive" }); 
+      return; 
+    }
     setLoading(true);
     try {
-      await login(email, password);
+      // Convert phone to email format for mock API if needed
+      const loginId = phone.includes("@") ? phone : `${phone}@demo.com`;
+      await login(loginId, password);
       navigate("/dashboard/applications");
     } catch {
       toast({ title: t("login.failed"), variant: "destructive" });
-    } finally { setLoading(false); }
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   return (
-    <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 relative">
-        <img src={authBg} alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-foreground/20" />
-        <div className="absolute bottom-12 left-12 right-12">
-          <h2 className="text-3xl font-bold text-primary-foreground mb-3">{t("login.welcome")}</h2>
-          <p className="text-primary-foreground/70">{t("login.welcomeSub")}</p>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm space-y-8">
+        {/* Logo */}
+        <div className="text-center">
+          <Link to="/" className="inline-flex items-center gap-2 mb-8">
+            <Home className="h-6 w-6 text-primary" strokeWidth={1.5} />
+            <span className="font-bold text-2xl text-primary">Kodi</span>
+          </Link>
         </div>
-      </div>
-      <div className="flex-1 flex items-center justify-center p-6 bg-gradient-to-br from-background to-muted/30">
-        <Card className="w-full max-w-md glass-strong animate-slide-up border-border/30">
-          <CardHeader className="text-center space-y-2">
-            <Link to="/" className="inline-flex items-center gap-2 font-extrabold text-xl text-gradient mx-auto mb-2">
-              <Home className="h-5 w-5 text-primary" />NIKONEKTI
-            </Link>
-            <CardTitle className="text-2xl">{t("login.title")}</CardTitle>
-            <CardDescription>{t("login.subtitle")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">{t("login.email")}</Label>
-                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">{t("login.phone")}</Label>
-                <Input id="phone" type="tel" placeholder="+255 7XX XXX XXX" value={phone} onChange={(e) => setPhone(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">{t("login.password")}</Label>
-                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
-              </div>
-              <Button type="submit" className="w-full h-11 text-base font-semibold shadow-md" disabled={loading}>{loading ? t("login.submitting") : t("login.submit")}</Button>
-            </form>
-            <p className="mt-4 text-center text-sm text-muted-foreground">{t("login.noAccount")} <Link to="/register" className="text-primary font-medium hover:underline">{t("login.register")}</Link></p>
-          </CardContent>
-        </Card>
+
+        {/* Tab switcher */}
+        <div className="flex border-b border-border">
+          <button className="flex-1 pb-3 text-sm font-semibold text-primary border-b-2 border-primary">
+            Ingia
+          </button>
+          <Link to="/register" className="flex-1 pb-3 text-sm font-medium text-muted-foreground text-center hover:text-foreground">
+            Jisajili
+          </Link>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <Label className="text-sm text-foreground">Nambari ya Simu</Label>
+            <div className="flex">
+              <span className="inline-flex items-center px-3 bg-muted border border-r-0 border-border rounded-l text-sm text-muted-foreground">
+                +255
+              </span>
+              <Input 
+                type="tel" 
+                placeholder="7XX XXX XXX" 
+                value={phone} 
+                onChange={(e) => setPhone(e.target.value)}
+                className="rounded-l-none rounded-r border-border"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm text-foreground">{t("login.password")}</Label>
+            <Input 
+              type="password" 
+              placeholder="••••••••" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              className="rounded border-border"
+            />
+          </div>
+
+          <Button 
+            type="submit" 
+            className="w-full h-12 rounded bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" 
+            disabled={loading}
+          >
+            {loading ? t("login.submitting") : t("login.submit")}
+          </Button>
+        </form>
+
+        {/* Demo credentials hint */}
+        <div className="text-center text-xs text-muted-foreground space-y-1">
+          <p>Demo: tenant@demo.com | landlord@demo.com | admin@demo.com</p>
+          <p>Password: password123</p>
+        </div>
+
+        <p className="text-center text-sm text-muted-foreground">
+          {t("login.noAccount")}{" "}
+          <Link to="/register" className="text-primary font-medium hover:underline">
+            {t("login.register")}
+          </Link>
+        </p>
       </div>
     </div>
   );
