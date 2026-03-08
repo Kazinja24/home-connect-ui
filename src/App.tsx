@@ -15,6 +15,7 @@ import Register from "./pages/Register";
 import Properties from "./pages/Properties";
 import PropertyDetails from "./pages/PropertyDetails";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
 
 import TenantApplications from "./pages/tenant/TenantApplications";
 import TenantViewings from "./pages/tenant/TenantViewings";
