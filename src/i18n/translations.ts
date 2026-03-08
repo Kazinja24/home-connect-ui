@@ -501,7 +501,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.landlord3": "Review applications and tenant information",
     "landing.landlord4": "Create and publish lease agreements",
     "landing.ctaTitle": "Ready to get started?",
-    "landing.ctaSub": "Join thousands of tenants and landlords on Kodi.",
+    "landing.ctaSub": "Join thousands of tenants and landlords on Nikonekti.",
     "landing.registerTenant": "Sign up as Tenant",
     "landing.registerLandlord": "Sign up as Landlord",
     "landing.available": "Available",
