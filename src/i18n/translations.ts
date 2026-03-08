@@ -363,6 +363,22 @@ const translations: Record<Lang, Record<string, string>> = {
     "admin.totalApplications": "Jumla Maombi",
     "admin.accepted": "Yaliyokubaliwa",
     "admin.leasesSigned": "Mikataba Iliyosainiwa",
+
+    // Profile
+    "profile.title": "Wasifu Wangu",
+    "profile.fullName": "Jina Kamili",
+    "profile.email": "Barua pepe",
+    "profile.phone": "Nambari ya Simu",
+    "profile.role": "Jukumu",
+    "profile.memberSince": "Mwanachama Tangu",
+    "profile.prototypeDate": "Januari 2026 (Prototype)",
+
+    // Landlord Tenants
+    "landlord.activeTenants": "Wapangaji Hai",
+    "landlord.tenantName": "Jina la Mpangaji",
+    "landlord.leaseperiod": "Kipindi cha Mkataba",
+    "landlord.rentStatus": "Hali ya Kodi",
+    "landlord.lastPayment": "Malipo ya Mwisho",
   },
 
   en: {
