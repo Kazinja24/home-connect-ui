@@ -43,72 +43,78 @@ import AdminLifecycle from "./pages/admin/AdminLifecycle";
 
 const queryClient = new QueryClient();
 
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<Index />} />
+        <Route path="/properties" element={<Properties />} />
+        <Route path="/properties/:id" element={<PropertyDetails />} />
+      </Route>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["tenant", "landlord"]}>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="applications" element={<TenantApplications />} />
+        <Route path="viewings" element={<TenantViewings />} />
+        <Route path="leases" element={<TenantLeases />} />
+        <Route path="offers" element={<TenantOffers />} />
+        <Route path="payments" element={<TenantPayments />} />
+        <Route path="invoices" element={<TenantInvoices />} />
+        <Route path="messages" element={<TenantMessages />} />
+
+        <Route path="overview" element={<LandlordOverview />} />
+        <Route path="properties" element={<LandlordProperties />} />
+        <Route path="properties/new" element={<LandlordProperties />} />
+        <Route path="landlord-viewings" element={<LandlordViewings />} />
+        <Route path="landlord-applications" element={<LandlordApplications />} />
+        <Route path="verification" element={<LandlordVerification />} />
+        <Route path="landlord-leases" element={<LandlordLeases />} />
+        <Route path="landlord-offers" element={<LandlordOffers />} />
+        <Route path="landlord-payments" element={<LandlordPayments />} />
+        <Route path="landlord-invoices" element={<LandlordInvoices />} />
+        <Route path="landlord-messages" element={<LandlordMessages />} />
+      </Route>
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="overview" element={<AdminOverview />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="properties" element={<AdminProperties />} />
+        <Route path="analytics" element={<AdminAnalytics />} />
+        <Route path="lifecycle" element={<AdminLifecycle />} />
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route element={<PublicLayout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/properties" element={<Properties />} />
-                <Route path="/properties/:id" element={<PropertyDetails />} />
-              </Route>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={["tenant", "landlord"]}>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="applications" element={<TenantApplications />} />
-                <Route path="viewings" element={<TenantViewings />} />
-                <Route path="leases" element={<TenantLeases />} />
-                <Route path="offers" element={<TenantOffers />} />
-                <Route path="payments" element={<TenantPayments />} />
-                <Route path="invoices" element={<TenantInvoices />} />
-                <Route path="messages" element={<TenantMessages />} />
-
-                <Route path="overview" element={<LandlordOverview />} />
-                <Route path="properties" element={<LandlordProperties />} />
-                <Route path="properties/new" element={<LandlordProperties />} />
-                <Route path="landlord-viewings" element={<LandlordViewings />} />
-                <Route path="landlord-applications" element={<LandlordApplications />} />
-                <Route path="verification" element={<LandlordVerification />} />
-                <Route path="landlord-leases" element={<LandlordLeases />} />
-                <Route path="landlord-offers" element={<LandlordOffers />} />
-                <Route path="landlord-payments" element={<LandlordPayments />} />
-                <Route path="landlord-invoices" element={<LandlordInvoices />} />
-                <Route path="landlord-messages" element={<LandlordMessages />} />
-              </Route>
-
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="overview" element={<AdminOverview />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="properties" element={<AdminProperties />} />
-                <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="lifecycle" element={<AdminLifecycle />} />
-              </Route>
-
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
+          </TooltipProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </LanguageProvider>
   </QueryClientProvider>
 );
