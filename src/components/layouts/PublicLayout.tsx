@@ -58,7 +58,7 @@ export function PublicLayout() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <img src={nikonektiLogo} alt="Nikonekti" className="h-6 w-auto brightness-0 invert" />
-              <span className="font-bold text-lg">Nikonekti</span>
+              <span className="font-bold text-lg">NIKONEKTI</span>
             </div>
             <p className="text-sm text-primary-foreground/70">{t("footer.tagline")}</p>
             <p className="text-xs text-primary-foreground/50 mt-4">Powered by M-Pesa payments</p>
