@@ -4,6 +4,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { applications as applicationsApi, auth as authApi, viewings as viewingsApi } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ActiveTenantsList } from "@/components/ActiveTenantsList";
 
 const LandlordOverview = () => {
   const { t } = useLanguage();
