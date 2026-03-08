@@ -5,58 +5,92 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, User, Upload } from "lucide-react";
+import { Building2, User, Upload, Camera } from "lucide-react";
 import nikonektiLogo from "@/assets/nikonekti-logo.png";
 import { useToast } from "@/hooks/use-toast";
 import type { UserRole } from "@/types";
 import { cn } from "@/lib/utils";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const Register = () => {
   const [searchParams] = useSearchParams();
-  const [step, setStep] = useState(1); // 1: role, 2: details, 3: NIDA (landlord)
+  // Steps: 1=role, 2=phone, 3=OTP, 4=profile, 5=NIDA+selfie (landlord)
+  const [step, setStep] = useState(1);
   const [role, setRole] = useState<UserRole>((searchParams.get("role") as UserRole) || "tenant");
-  const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [nidaFile, setNidaFile] = useState<File | null>(null);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const handleSendOtp = async () => {
+    if (!phone || phone.length < 9) {
+      toast({ title: "Tafadhali weka nambari sahihi ya simu", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    // Mock OTP send
+    await new Promise((r) => setTimeout(r, 800));
+    setOtpSent(true);
+    setLoading(false);
+    toast({ title: "Nambari ya uthibitisho imetumwa kwa +255 " + phone });
+    setStep(3);
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otp.length < 6) {
+      toast({ title: "Tafadhali weka nambari kamili ya uthibitisho", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    // Mock OTP verification (accept any 6-digit code)
+    await new Promise((r) => setTimeout(r, 600));
+    setLoading(false);
+    toast({ title: "Nambari imethibitishwa!" });
+    setStep(4);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (step === 1) {
       setStep(2);
       return;
     }
 
     if (step === 2) {
-      if (!fullName || !phone || !email || !password) { 
-        toast({ title: t("register.fillAll"), variant: "destructive" }); 
-        return; 
-      }
-      if (password.length < 8) { 
-        toast({ title: t("register.passwordShort"), variant: "destructive" }); 
-        return; 
-      }
-      
-      if (role === "landlord") {
-        setStep(3);
+      await handleSendOtp();
+      return;
+    }
+
+    if (step === 3) {
+      await handleVerifyOtp();
+      return;
+    }
+
+    if (step === 4) {
+      if (!fullName) {
+        toast({ title: t("register.fillAll"), variant: "destructive" });
         return;
       }
-      
-      // Register tenant
+      if (role === "landlord") {
+        setStep(5);
+        return;
+      }
       await doRegister();
       return;
     }
 
-    // Step 3: NIDA upload for landlord
-    if (!nidaFile) {
-      toast({ title: "Tafadhali pakia kitambulisho cha NIDA", variant: "destructive" });
+    // Step 5: NIDA + selfie for landlord
+    if (!nidaFile || !selfieFile) {
+      toast({ title: "Tafadhali pakia kitambulisho cha NIDA na picha ya uso", variant: "destructive" });
       return;
     }
     await doRegister();
@@ -65,14 +99,28 @@ const Register = () => {
   const doRegister = async () => {
     setLoading(true);
     try {
-      await register({ fullName, email, phone, password, role });
+      await register({ fullName, email: email || `${phone}@nikonekti.co.tz`, phone, password: "otp-verified", role });
       navigate(role === "landlord" ? "/dashboard/overview" : "/dashboard/applications");
     } catch {
       toast({ title: t("register.failed"), variant: "destructive" });
-    } finally { 
-      setLoading(false); 
+    } finally {
+      setLoading(false);
     }
   };
+
+  const stepIndicator = (
+    <div className="flex items-center justify-center gap-2 mb-6">
+      {Array.from({ length: role === "landlord" ? 5 : 4 }).map((_, i) => (
+        <div
+          key={i}
+          className={cn(
+            "h-2 rounded-full transition-all",
+            i + 1 === step ? "w-8 bg-primary" : i + 1 < step ? "w-2 bg-primary/60" : "w-2 bg-border"
+          )}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
@@ -95,37 +143,32 @@ const Register = () => {
           </button>
         </div>
 
+        {stepIndicator}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Step 1: Role selection */}
           {step === 1 && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground text-center mb-4">Chagua aina ya akaunti</p>
               <div className="grid grid-cols-2 gap-4">
-                {/* Tenant card */}
                 <button
                   type="button"
                   onClick={() => setRole("tenant")}
                   className={cn(
                     "p-6 rounded-lg border-2 text-center transition-all",
-                    role === "tenant" 
-                      ? "border-primary bg-primary/5" 
-                      : "border-border hover:border-primary/50"
+                    role === "tenant" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
                   )}
                 >
                   <User className={cn("h-8 w-8 mx-auto mb-3", role === "tenant" ? "text-primary" : "text-muted-foreground")} strokeWidth={1.5} />
                   <p className="font-semibold text-foreground">Mpangaji</p>
                   <p className="text-xs text-muted-foreground mt-1">Tafuta nyumba</p>
                 </button>
-
-                {/* Landlord card */}
                 <button
                   type="button"
                   onClick={() => setRole("landlord")}
                   className={cn(
                     "p-6 rounded-lg border-2 text-center transition-all",
-                    role === "landlord" 
-                      ? "border-primary bg-primary/5" 
-                      : "border-border hover:border-primary/50"
+                    role === "landlord" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
                   )}
                 >
                   <Building2 className={cn("h-8 w-8 mx-auto mb-3", role === "landlord" ? "text-primary" : "text-muted-foreground")} strokeWidth={1.5} />
@@ -139,59 +182,110 @@ const Register = () => {
             </div>
           )}
 
-          {/* Step 2: Details */}
+          {/* Step 2: Phone number */}
           {step === 2 && (
             <div className="space-y-5">
-              <div className="space-y-2">
-                <Label className="text-sm">{t("register.fullName")}</Label>
-                <Input 
-                  placeholder="Jina Kamili" 
-                  value={fullName} 
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="rounded border-border"
-                />
+              <div className="text-center mb-2">
+                <p className="font-semibold text-foreground">Weka Nambari ya Simu</p>
+                <p className="text-sm text-muted-foreground mt-1">Tutatuma nambari ya uthibitisho (OTP)</p>
               </div>
-
               <div className="space-y-2">
                 <Label className="text-sm">Nambari ya Simu</Label>
                 <div className="flex">
                   <span className="inline-flex items-center px-3 bg-muted border border-r-0 border-border rounded-l text-sm text-muted-foreground">
                     +255
                   </span>
-                  <Input 
-                    type="tel" 
-                    placeholder="7XX XXX XXX" 
-                    value={phone} 
+                  <Input
+                    type="tel"
+                    placeholder="7XX XXX XXX"
+                    value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="rounded-l-none rounded-r border-border"
+                    autoFocus
                   />
                 </div>
               </div>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1 rounded">
+                  Rudi
+                </Button>
+                <Button type="submit" className="flex-1 h-12 rounded bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" disabled={loading}>
+                  {loading ? "Inatuma…" : "Tuma OTP"}
+                </Button>
+              </div>
+            </div>
+          )}
 
+          {/* Step 3: OTP verification */}
+          {step === 3 && (
+            <div className="space-y-5">
+              <div className="text-center mb-2">
+                <p className="font-semibold text-foreground">Thibitisha Nambari</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Weka nambari ya uthibitisho iliyotumwa kwa<br />
+                  <span className="font-medium text-foreground">+255 {phone}</span>
+                </p>
+              </div>
+              <div className="flex justify-center">
+                <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+              <button
+                type="button"
+                onClick={handleSendOtp}
+                className="text-sm text-primary hover:underline mx-auto block"
+                disabled={loading}
+              >
+                Hukupata? Tuma tena
+              </button>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={() => { setStep(2); setOtp(""); }} className="flex-1 rounded">
+                  Rudi
+                </Button>
+                <Button type="submit" className="flex-1 h-12 rounded bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" disabled={loading || otp.length < 6}>
+                  {loading ? "Inathiditisha…" : "Thibitisha"}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Basic profile */}
+          {step === 4 && (
+            <div className="space-y-5">
+              <div className="text-center mb-2">
+                <p className="font-semibold text-foreground">Taarifa za Msingi</p>
+                <p className="text-sm text-muted-foreground mt-1">Jaza taarifa zako ili kukamilisha usajili</p>
+              </div>
               <div className="space-y-2">
-                <Label className="text-sm">{t("register.email")}</Label>
-                <Input 
-                  type="email" 
-                  placeholder="barua@mfano.com" 
-                  value={email} 
+                <Label className="text-sm">{t("register.fullName")}</Label>
+                <Input
+                  placeholder="Jina Kamili"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="rounded border-border"
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm">{t("register.email")} (hiari)</Label>
+                <Input
+                  type="email"
+                  placeholder="barua@mfano.com"
+                  value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="rounded border-border"
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm">{t("register.password")}</Label>
-                <Input 
-                  type="password" 
-                  placeholder="Angalau herufi 8" 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="rounded border-border"
-                />
-              </div>
-
               <div className="flex gap-3">
-                <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1 rounded">
+                <Button type="button" variant="outline" onClick={() => setStep(3)} className="flex-1 rounded">
                   Rudi
                 </Button>
                 <Button type="submit" className="flex-1 h-12 rounded bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" disabled={loading}>
@@ -201,22 +295,23 @@ const Register = () => {
             </div>
           )}
 
-          {/* Step 3: NIDA upload (landlord only) */}
-          {step === 3 && (
+          {/* Step 5: NIDA + Selfie upload (landlord only) */}
+          {step === 5 && (
             <div className="space-y-5">
               <div className="text-center mb-4">
                 <p className="font-semibold text-foreground">Thibitisha Kitambulisho</p>
-                <p className="text-sm text-muted-foreground mt-1">Pakia picha ya Kitambulisho cha NIDA</p>
+                <p className="text-sm text-muted-foreground mt-1">Pakia NIDA na picha ya uso wako kwa uthibitisho</p>
               </div>
 
-              <label className="block border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors">
-                <input 
-                  type="file" 
-                  accept="image/*,.pdf" 
+              {/* NIDA upload */}
+              <label className="block border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors">
+                <input
+                  type="file"
+                  accept="image/*,.pdf"
                   className="hidden"
                   onChange={(e) => setNidaFile(e.target.files?.[0] || null)}
                 />
-                <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" strokeWidth={1.5} />
+                <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" strokeWidth={1.5} />
                 {nidaFile ? (
                   <p className="text-sm font-medium text-primary">{nidaFile.name}</p>
                 ) : (
@@ -227,14 +322,38 @@ const Register = () => {
                 )}
               </label>
 
+              {/* Selfie upload */}
+              <label className="block border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors">
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="user"
+                  className="hidden"
+                  onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
+                />
+                <Camera className="h-8 w-8 mx-auto text-muted-foreground mb-2" strokeWidth={1.5} />
+                {selfieFile ? (
+                  <p className="text-sm font-medium text-primary">{selfieFile.name}</p>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-foreground">Piga Picha ya Uso (Selfie)</p>
+                    <p className="text-xs text-muted-foreground mt-1">Picha wazi ya uso wako</p>
+                  </>
+                )}
+              </label>
+
               <div className="flex gap-3">
-                <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1 rounded">
+                <Button type="button" variant="outline" onClick={() => setStep(4)} className="flex-1 rounded">
                   Rudi
                 </Button>
                 <Button type="submit" className="flex-1 h-12 rounded bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" disabled={loading}>
                   {loading ? t("register.submitting") : "Maliza Usajili"}
                 </Button>
               </div>
+
+              <p className="text-xs text-muted-foreground text-center">
+                Msimamizi atakagua hati zako ndani ya masaa 24. Utapata taarifa kwa SMS.
+              </p>
             </div>
           )}
         </form>
