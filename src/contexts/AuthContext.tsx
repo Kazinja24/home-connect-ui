@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     clearToken();
     clearRefreshToken();
-    localStorage.removeItem("kodi_mock_user");
+    localStorage.removeItem("nikonekti_mock_user");
     setUser(null);
   }, []);
 

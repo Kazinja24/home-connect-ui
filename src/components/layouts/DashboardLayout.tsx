@@ -59,7 +59,7 @@ export function DashboardLayout() {
           <SidebarHeader className="p-5 border-b border-sidebar-border">
             <Link to="/" className="flex items-center gap-2 font-bold text-lg text-sidebar-foreground">
               <Home className="h-5 w-5" strokeWidth={1.5} />
-              Kodi
+              Nikonekti
             </Link>
             <p className="text-xs text-sidebar-foreground/60 capitalize mt-1">
               {role === "tenant" ? t("role.tenantDashboard") : role === "landlord" ? t("role.landlordDashboard") : t("role.adminPanel")}

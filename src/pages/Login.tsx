@@ -44,7 +44,7 @@ const Login = () => {
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-8">
             <Home className="h-6 w-6 text-primary" strokeWidth={1.5} />
-            <span className="font-bold text-2xl text-primary">Kodi</span>
+            <span className="font-bold text-2xl text-primary">Nikonekti</span>
           </Link>
         </div>
 

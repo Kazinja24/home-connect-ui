@@ -48,12 +48,12 @@ export function normalizePropertyImages(images: any): string[] {
 }
 
 // ─── Token management ────────────────────────────────────────────
-export function getToken(): string | null { return localStorage.getItem("kodi_token"); }
-export function setToken(token: string) { localStorage.setItem("kodi_token", token); }
-export function clearToken() { localStorage.removeItem("kodi_token"); }
-export function getRefreshToken(): string | null { return localStorage.getItem("kodi_refresh_token"); }
-export function setRefreshToken(token: string) { localStorage.setItem("kodi_refresh_token", token); }
-export function clearRefreshToken() { localStorage.removeItem("kodi_refresh_token"); }
+export function getToken(): string | null { return localStorage.getItem("nikonekti_token"); }
+export function setToken(token: string) { localStorage.setItem("nikonekti_token", token); }
+export function clearToken() { localStorage.removeItem("nikonekti_token"); }
+export function getRefreshToken(): string | null { return localStorage.getItem("nikonekti_refresh_token"); }
+export function setRefreshToken(token: string) { localStorage.setItem("nikonekti_refresh_token", token); }
+export function clearRefreshToken() { localStorage.removeItem("nikonekti_refresh_token"); }
 
 // ─── Real API client (only used when not in mock mode) ───────────
 function normalizeApiError(err: any): string {
