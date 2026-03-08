@@ -15,10 +15,11 @@ const LandlordVerification: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identity || !supporting) return;
+    if (!identity || !selfie || !supporting) return;
 
     const fd = new FormData();
     fd.append('identity_document', identity);
+    fd.append('selfie', selfie);
     fd.append('landlord_supporting_document', supporting);
 
     mutation.mutate(fd, {
