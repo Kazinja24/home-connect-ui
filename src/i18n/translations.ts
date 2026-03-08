@@ -136,7 +136,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "footer.company": "Kampuni",
     "footer.about": "Kuhusu",
     "footer.contact": "Wasiliana",
-    "footer.copyright": "© 2026 NIKONEKTI. Haki zote zimehifadhiwa.",
+    "footer.copyright": "© 2026 Kodi. Haki zote zimehifadhiwa.",
 
     // Properties page
     "properties.title": "Vinjari Nyumba",
