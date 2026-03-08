@@ -306,7 +306,21 @@ export const mockAuditApi = {
 
 // ─── Features ────────────────────────────────────────────────────
 export const mockFeaturesApi = {
-  list: async () => { await delay(); return []; },
+  list: async () => {
+    await delay();
+    return [
+      { id: 1, name: "WiFi" },
+      { id: 2, name: "Parking" },
+      { id: 3, name: "AC" },
+      { id: 4, name: "24/7 Security" },
+      { id: 5, name: "Swimming Pool" },
+      { id: 6, name: "Gym" },
+      { id: 7, name: "Garden" },
+      { id: 8, name: "Elevator" },
+      { id: 9, name: "Water Supply" },
+      { id: 10, name: "Backup Generator" },
+    ];
+  },
 };
 
 // ─── Moderation ──────────────────────────────────────────────────
