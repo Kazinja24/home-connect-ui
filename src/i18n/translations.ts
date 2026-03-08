@@ -489,7 +489,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.featuredSub": "Handpicked for you",
     "landing.viewAll": "View all",
     "landing.benefits": "Benefits",
-    "landing.whyNikonekti": "Why NIKONEKTI?",
+    "landing.whyNikonekti": "Why Kodi?",
     "landing.forTenants": "For Tenants",
     "landing.forLandlords": "For Landlords",
     "landing.tenant1": "Browse verified listings with real photos",
