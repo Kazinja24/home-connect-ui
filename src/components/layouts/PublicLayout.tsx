@@ -57,7 +57,7 @@ export function PublicLayout() {
         <div className="container py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <img src={nikonektiLogo} alt="Nikonekti" className="h-6 w-auto brightness-0 invert" />
+              <img src={nikonektiLogo} alt="NIKONEKTI" className="h-6 w-auto brightness-0 invert" />
               <span className="font-bold text-lg">NIKONEKTI</span>
             </div>
             <p className="text-sm text-primary-foreground/70">{t("footer.tagline")}</p>
