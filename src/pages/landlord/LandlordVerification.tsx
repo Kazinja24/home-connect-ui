@@ -3,21 +3,23 @@ import { useVerificationSubmit } from '@/hooks/useVerification';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { AlertTriangle, CheckCircle, Upload } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Upload, Camera } from 'lucide-react';
 import { useLanguage } from '@/i18n/LanguageContext';
 
 const LandlordVerification: React.FC = () => {
   const { t } = useLanguage();
   const [identity, setIdentity] = useState<File | null>(null);
+  const [selfie, setSelfie] = useState<File | null>(null);
   const [supporting, setSupporting] = useState<File | null>(null);
   const mutation = useVerificationSubmit();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identity || !supporting) return;
+    if (!identity || !selfie || !supporting) return;
 
     const fd = new FormData();
     fd.append('identity_document', identity);
+    fd.append('selfie', selfie);
     fd.append('landlord_supporting_document', supporting);
 
     mutation.mutate(fd, {
@@ -61,6 +63,16 @@ const LandlordVerification: React.FC = () => {
                 </div>
               </div>
               <div className="space-y-2">
+                <Label>{t("landlord.selfiePhoto") || "Selfie Photo"}</Label>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                    <Camera className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{selfie ? selfie.name : (t("landlord.takeSelfie") || "Take selfie")}</span>
+                    <input type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => setSelfie(e.target.files?.[0] ?? null)} />
+                  </label>
+                </div>
+              </div>
+              <div className="space-y-2">
                 <Label>{t("landlord.supportingDoc") || "Supporting Document"}</Label>
                 <div className="flex items-center gap-3">
                   <label className="flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
@@ -70,7 +82,7 @@ const LandlordVerification: React.FC = () => {
                   </label>
                 </div>
               </div>
-              <Button type="submit" disabled={mutation.isPending || !identity || !supporting} className="font-semibold">
+              <Button type="submit" disabled={mutation.isPending || !identity || !selfie || !supporting} className="font-semibold">
                 {mutation.isPending ? (t("common.loading") || "Submitting...") : (t("common.submit") || "Submit for Verification")}
               </Button>
               {mutation.isError && (
