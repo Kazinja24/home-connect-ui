@@ -1,7 +1,7 @@
 import { Link, Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import nikonektiLogo from "@/assets/nikonekti-logo.png";
 
 export function PublicLayout() {
   const { t, lang, setLang } = useLanguage();
@@ -13,9 +13,7 @@ export function PublicLayout() {
         <div className="container flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex items-center justify-center">
-              <Home className="h-5 w-5 text-primary" strokeWidth={1.5} />
-            </div>
+            <img src={nikonektiLogo} alt="Nikonekti" className="h-8 w-auto" />
             <span className="font-bold text-xl text-primary tracking-tight">Nikonekti</span>
           </Link>
 
@@ -59,7 +57,7 @@ export function PublicLayout() {
         <div className="container py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <Home className="h-5 w-5" strokeWidth={1.5} />
+              <img src={nikonektiLogo} alt="Nikonekti" className="h-6 w-auto brightness-0 invert" />
               <span className="font-bold text-lg">Nikonekti</span>
             </div>
             <p className="text-sm text-primary-foreground/70">{t("footer.tagline")}</p>

@@ -5,7 +5,8 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Home, Building2, User, Upload } from "lucide-react";
+import { Building2, User, Upload } from "lucide-react";
+import nikonektiLogo from "@/assets/nikonekti-logo.png";
 import { useToast } from "@/hooks/use-toast";
 import type { UserRole } from "@/types";
 import { cn } from "@/lib/utils";
@@ -79,7 +80,7 @@ const Register = () => {
         {/* Logo */}
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-8">
-            <Home className="h-6 w-6 text-primary" strokeWidth={1.5} />
+            <img src={nikonektiLogo} alt="Nikonekti" className="h-8 w-auto" />
             <span className="font-bold text-2xl text-primary">Nikonekti</span>
           </Link>
         </div>
