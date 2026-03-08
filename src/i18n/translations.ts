@@ -84,7 +84,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.badge": "Jukwaa #1 la Kukodisha Tanzania",
     "landing.title1": "Pata nyumba yako",
     "landing.title2": "kwa urahisi",
-    "landing.subtitle": "NIKONEKTI inaunganisha wapangaji na wamiliki kwenye jukwaa moja la kuaminika. Tafuta, omba, na kodisha — yote sehemu moja.",
+    "landing.subtitle": "Kodi inaunganisha wapangaji na wamiliki kwenye jukwaa moja la kuaminika. Tafuta, omba, na kodisha — yote sehemu moja.",
     "landing.searchPlaceholder": "Tafuta vyumba, nyumba, au maeneo…",
     "landing.search": "Tafuta",
     "landing.properties": "Nyumba",
