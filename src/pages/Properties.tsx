@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,7 @@ const Properties = () => {
   const [availableFeatures, setAvailableFeatures] = useState<any[]>([]);
   const [selectedFeatures, setSelectedFeatures] = useState<number[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+
   const { data } = useQuery({
     queryKey: ["public-properties", location, propertyType, bedrooms, minPrice, maxPrice, selectedFeatures],
     queryFn: () => {
@@ -51,14 +52,23 @@ const Properties = () => {
       return propertiesApi.list(params);
     },
   });
-  const allProperties = (data || []).map(mapApiProperty);
 
-  // fetch master features
+  // Only show PUBLISHED properties
+  const allProperties = (data || [])
+    .filter((item: any) => {
+      const ls = String(item.listing_status || "").toLowerCase();
+      return ls === "published" || ls === "";
+    })
+    .map(mapApiProperty);
+
   const { data: featuresData } = useQuery({
     queryKey: ["features"],
     queryFn: () => featuresApi.list(),
-    onSuccess: (d: any) => setAvailableFeatures(d || []),
   });
+
+  useEffect(() => {
+    if (featuresData) setAvailableFeatures(featuresData);
+  }, [featuresData]);
 
   const filtered = allProperties.filter((p) => {
     if (location && !p.location.toLowerCase().includes(location.toLowerCase())) return false;
