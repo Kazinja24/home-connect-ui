@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { User, UserRole } from "@/types";
-import { auth as authApi, setToken, setRefreshToken, clearToken, clearRefreshToken, getToken } from "@/lib/api";
+import { auth as authApi, setToken, setRefreshToken, clearToken, clearRefreshToken, getToken, IS_MOCK_MODE } from "@/lib/api";
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
+  isMockMode: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: { fullName: string; email: string; phone: string; password: string; role: UserRole }) => Promise<void>;
   logout: () => void;
@@ -15,9 +16,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 function mapRole(role: string): UserRole {
   const normalized = role.toLowerCase();
-  if (normalized === "tenant" || normalized === "landlord" || normalized === "admin") {
-    return normalized;
-  }
+  if (normalized === "tenant" || normalized === "landlord" || normalized === "admin") return normalized;
   return "tenant";
 }
 
@@ -35,8 +34,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // On mount, check for existing token and load profile
   useEffect(() => {
+    if (IS_MOCK_MODE) {
+      // In mock mode, check if there's a stored mock user
+      const storedUser = localStorage.getItem("nikonekti_mock_user");
+      if (storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser);
+          setUser(mapApiUser(parsed));
+        } catch { /* ignore */ }
+      }
+      setLoading(false);
+      return;
+    }
+
     const token = getToken();
     if (token) {
       authApi.getProfile()
@@ -70,11 +81,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     clearToken();
     clearRefreshToken();
+    localStorage.removeItem("nikonekti_mock_user");
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, isMockMode: IS_MOCK_MODE, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
