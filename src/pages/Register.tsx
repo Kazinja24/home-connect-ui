@@ -80,8 +80,8 @@ const Register = () => {
         {/* Logo */}
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-8">
-            <img src={nikonektiLogo} alt="Nikonekti" className="h-8 w-auto" />
-            <span className="font-bold text-2xl text-primary">Nikonekti</span>
+            <img src={nikonektiLogo} alt="NIKONEKTI" className="h-8 w-auto" />
+            <span className="font-bold text-2xl text-primary">NIKONEKTI</span>
           </Link>
         </div>
 

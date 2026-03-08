@@ -59,8 +59,8 @@ export function DashboardLayout() {
         <Sidebar>
           <SidebarHeader className="p-5 border-b border-sidebar-border">
             <Link to="/" className="flex items-center gap-2 font-bold text-lg text-sidebar-foreground">
-              <img src={nikonektiLogo} alt="Nikonekti" className="h-7 w-auto brightness-0 invert" />
-              Nikonekti
+              <img src={nikonektiLogo} alt="NIKONEKTI" className="h-7 w-auto brightness-0 invert" />
+              NIKONEKTI
             </Link>
             <p className="text-xs text-sidebar-foreground/60 capitalize mt-1">
               {role === "tenant" ? t("role.tenantDashboard") : role === "landlord" ? t("role.landlordDashboard") : t("role.adminPanel")}
