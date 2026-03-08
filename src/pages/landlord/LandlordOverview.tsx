@@ -46,6 +46,8 @@ const LandlordOverview = () => {
           </>
         )}
       </div>
+
+      <ActiveTenantsList />
     </div>
   );
 };
