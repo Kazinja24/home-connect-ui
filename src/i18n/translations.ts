@@ -467,7 +467,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.badge": "#1 Rental Platform in Tanzania",
     "landing.title1": "Find your home",
     "landing.title2": "with ease",
-    "landing.subtitle": "NIKONEKTI connects tenants and landlords on a single trusted platform. Search, apply, and rent — all in one place.",
+    "landing.subtitle": "Kodi connects tenants and landlords on a single trusted platform. Search, apply, and rent — all in one place.",
     "landing.searchPlaceholder": "Search rooms, houses, or locations…",
     "landing.search": "Search",
     "landing.properties": "Properties",
