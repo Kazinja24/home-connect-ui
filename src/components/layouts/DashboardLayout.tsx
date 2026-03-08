@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus, CreditCard, Wallet, Receipt, MessageSquare, Globe, Handshake } from "lucide-react";
+import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus, CreditCard, Wallet, Receipt, MessageSquare, Globe, Handshake, UserCircle } from "lucide-react";
 import type { UserRole } from "@/types";
 
 export function DashboardLayout() {
