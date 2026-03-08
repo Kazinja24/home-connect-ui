@@ -19,6 +19,7 @@ export function DashboardLayout() {
 
   const navItems: Record<UserRole, { title: string; url: string; icon: typeof Home }[]> = {
     tenant: [
+      { title: t("profile.title"), url: "/dashboard/profile", icon: UserCircle },
       { title: t("tenant.applications"), url: "/dashboard/applications", icon: ClipboardList },
       { title: t("tenant.viewings"), url: "/dashboard/viewings", icon: Eye },
       { title: t("tenant.leases"), url: "/dashboard/leases", icon: FileText },
