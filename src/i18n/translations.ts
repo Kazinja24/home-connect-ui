@@ -193,6 +193,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "login.title": "Karibu tena",
     "login.subtitle": "Ingia kwenye akaunti yako",
     "login.email": "Barua pepe",
+    "login.phone": "Nambari ya simu",
     "login.password": "Neno siri",
     "login.submit": "Ingia",
     "login.submitting": "Inaingia…",
