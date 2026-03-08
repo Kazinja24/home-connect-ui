@@ -7,8 +7,7 @@ import {
   SidebarMenuButton, SidebarTrigger, SidebarInset, SidebarGroup, SidebarGroupLabel, SidebarGroupContent,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus, CreditCard, Wallet, Receipt, MessageSquare, Globe, Handshake, UserCircle } from "lucide-react";
+import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus, CreditCard, Wallet, Receipt, MessageSquare, Handshake, UserCircle } from "lucide-react";
 import type { UserRole } from "@/types";
 
 export function DashboardLayout() {
@@ -55,12 +54,12 @@ export function DashboardLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background">
         <Sidebar>
-          <SidebarHeader className="p-5">
-            <Link to="/" className="flex items-center gap-2 font-extrabold text-lg text-sidebar-primary-foreground">
-              <Home className="h-5 w-5" />
-              NIKONEKTI
+          <SidebarHeader className="p-5 border-b border-sidebar-border">
+            <Link to="/" className="flex items-center gap-2 font-bold text-lg text-sidebar-foreground">
+              <Home className="h-5 w-5" strokeWidth={1.5} />
+              Kodi
             </Link>
             <p className="text-xs text-sidebar-foreground/60 capitalize mt-1">
               {role === "tenant" ? t("role.tenantDashboard") : role === "landlord" ? t("role.landlordDashboard") : t("role.adminPanel")}
@@ -68,14 +67,14 @@ export function DashboardLayout() {
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>{t("nav.navigation")}</SidebarGroupLabel>
+              <SidebarGroupLabel className="tag-label text-sidebar-foreground/50">{t("nav.navigation")}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {items.map((item) => (
                     <SidebarMenuItem key={item.url}>
                       <SidebarMenuButton asChild>
-                        <NavLink to={item.url} end className="flex items-center gap-2" activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium">
-                          <item.icon className="h-4 w-4" />
+                        <NavLink to={item.url} end className="flex items-center gap-2 text-sidebar-foreground/80 hover:text-sidebar-foreground" activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium">
+                          <item.icon className="h-4 w-4" strokeWidth={1.5} />
                           <span>{item.title}</span>
                         </NavLink>
                       </SidebarMenuButton>
@@ -92,7 +91,7 @@ export function DashboardLayout() {
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild>
                         <Link to="/dashboard/properties/new" className="flex items-center gap-2 text-sidebar-primary">
-                          <Plus className="h-4 w-4" /><span>{t("nav.addProperty")}</span>
+                          <Plus className="h-4 w-4" strokeWidth={1.5} /><span>{t("nav.addProperty")}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -104,20 +103,13 @@ export function DashboardLayout() {
 
           <div className="mt-auto p-4 border-t border-sidebar-border">
             {/* Language toggle */}
-            <div className="flex items-center gap-2 mb-3">
-              <Globe className="h-4 w-4 text-sidebar-foreground/60" />
-              <Select value={lang} onValueChange={(v) => setLang(v as "sw" | "en")}>
-                <SelectTrigger className="h-8 text-xs bg-sidebar-accent border-sidebar-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sw">Kiswahili</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-2 mb-3 text-xs text-sidebar-foreground/60">
+              <button onClick={() => setLang("sw")} className={lang === "sw" ? "text-sidebar-foreground" : ""}>SW</button>
+              <span>|</span>
+              <button onClick={() => setLang("en")} className={lang === "en" ? "text-sidebar-foreground" : ""}>EN</button>
             </div>
             <div className="flex items-center gap-3 mb-3">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-sidebar-primary to-sidebar-accent flex items-center justify-center text-xs font-bold text-sidebar-primary-foreground">
+              <div className="h-9 w-9 rounded bg-sidebar-accent flex items-center justify-center text-xs font-bold text-sidebar-accent-foreground">
                 {user?.fullName?.charAt(0) ?? "U"}
               </div>
               <div className="overflow-hidden">
@@ -125,18 +117,18 @@ export function DashboardLayout() {
                 <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email}</p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />{t("nav.logout")}
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent" onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" strokeWidth={1.5} />{t("nav.logout")}
             </Button>
           </div>
         </Sidebar>
 
         <SidebarInset>
-          <header className="flex h-14 items-center gap-4 border-b px-6 glass">
+          <header className="flex h-14 items-center gap-4 border-b border-border px-6 bg-card">
             <SidebarTrigger />
             {role === "admin" && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Shield className="h-3.5 w-3.5" />{t("role.adminPanel")}
+                <Shield className="h-3.5 w-3.5" strokeWidth={1.5} />{t("role.adminPanel")}
               </div>
             )}
           </header>

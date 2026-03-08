@@ -1,80 +1,100 @@
 import { Link, Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Home, Globe } from "lucide-react";
+import { Home } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 export function PublicLayout() {
   const { t, lang, setLang } = useLanguage();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-40 border-b glass-strong">
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-card border-b border-border">
         <div className="container flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-extrabold text-xl text-gradient">
-            <Home className="h-6 w-6 text-primary" />
-            NIKONEKTI
-          </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/properties" className="hover:text-foreground transition-colors font-medium">{t("nav.browse")}</Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <Globe className="h-4 w-4 text-muted-foreground" />
-              <Select value={lang} onValueChange={(v) => setLang(v as "sw" | "en")}>
-                <SelectTrigger className="h-8 w-20 text-xs border-border/50">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sw">SW</SelectItem>
-                  <SelectItem value="en">EN</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex items-center justify-center">
+              <Home className="h-5 w-5 text-primary" strokeWidth={1.5} />
             </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/login">{t("nav.login")}</Link>
-            </Button>
-            <Button size="sm" className="shadow-md" asChild>
+            <span className="font-bold text-xl text-primary tracking-tight">Kodi</span>
+          </Link>
+
+          {/* Right side */}
+          <div className="flex items-center gap-4">
+            {/* Language toggle */}
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <button
+                onClick={() => setLang("sw")}
+                className={`px-1.5 py-0.5 rounded ${lang === "sw" ? "bg-primary text-primary-foreground" : "hover:text-foreground"}`}
+              >
+                SW
+              </button>
+              <span>|</span>
+              <button
+                onClick={() => setLang("en")}
+                className={`px-1.5 py-0.5 rounded ${lang === "en" ? "bg-primary text-primary-foreground" : "hover:text-foreground"}`}
+              >
+                EN
+              </button>
+            </div>
+
+            {/* Auth links */}
+            <Link to="/login" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+              {t("nav.login")}
+            </Link>
+            <Button asChild size="sm" className="rounded bg-accent text-accent-foreground hover:bg-accent/90">
               <Link to="/register">{t("nav.register")}</Link>
             </Button>
           </div>
         </div>
       </header>
 
+      {/* Main content */}
       <main className="flex-1">
         <Outlet />
       </main>
 
-      <footer className="border-t bg-foreground text-primary-foreground">
-        <div className="container py-14 grid grid-cols-2 md:grid-cols-4 gap-8">
+      {/* Footer */}
+      <footer className="bg-primary text-primary-foreground">
+        <div className="container py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h4 className="font-extrabold text-lg mb-3 text-gradient">NIKONEKTI</h4>
-            <p className="text-sm text-primary-foreground/60">{t("footer.tagline")}</p>
+            <div className="flex items-center gap-2 mb-3">
+              <Home className="h-5 w-5" strokeWidth={1.5} />
+              <span className="font-bold text-lg">Kodi</span>
+            </div>
+            <p className="text-sm text-primary-foreground/70">{t("footer.tagline")}</p>
+            <p className="text-xs text-primary-foreground/50 mt-4">Powered by M-Pesa payments</p>
           </div>
           <div>
-            <h5 className="font-semibold mb-3 text-sm text-primary-foreground/80">{t("footer.forTenants")}</h5>
-            <ul className="space-y-2 text-sm text-primary-foreground/60">
+            <h5 className="font-semibold mb-3 text-sm">{t("footer.forTenants")}</h5>
+            <ul className="space-y-2 text-sm text-primary-foreground/70">
               <li><Link to="/properties" className="hover:text-primary-foreground transition-colors">{t("footer.browseProperties")}</Link></li>
               <li><Link to="/register" className="hover:text-primary-foreground transition-colors">{t("footer.register")}</Link></li>
             </ul>
           </div>
           <div>
-            <h5 className="font-semibold mb-3 text-sm text-primary-foreground/80">{t("footer.forLandlords")}</h5>
-            <ul className="space-y-2 text-sm text-primary-foreground/60">
-              <li><Link to="/register" className="hover:text-primary-foreground transition-colors">{t("footer.listProperty")}</Link></li>
+            <h5 className="font-semibold mb-3 text-sm">{t("footer.forLandlords")}</h5>
+            <ul className="space-y-2 text-sm text-primary-foreground/70">
+              <li><Link to="/register?role=landlord" className="hover:text-primary-foreground transition-colors">{t("footer.listProperty")}</Link></li>
             </ul>
           </div>
           <div>
-            <h5 className="font-semibold mb-3 text-sm text-primary-foreground/80">{t("footer.company")}</h5>
-            <ul className="space-y-2 text-sm text-primary-foreground/60">
+            <h5 className="font-semibold mb-3 text-sm">{t("footer.company")}</h5>
+            <ul className="space-y-2 text-sm text-primary-foreground/70">
               <li><Link to="/" className="hover:text-primary-foreground transition-colors">{t("footer.about")}</Link></li>
               <li><Link to="/" className="hover:text-primary-foreground transition-colors">{t("footer.contact")}</Link></li>
             </ul>
           </div>
         </div>
         <div className="border-t border-primary-foreground/10">
-          <div className="container py-4 text-center text-xs text-primary-foreground/40">
-            {t("footer.copyright")}
+          <div className="container py-4 flex items-center justify-between">
+            <p className="text-xs text-primary-foreground/50">{t("footer.copyright")}</p>
+            {/* Language toggle again */}
+            <div className="flex items-center gap-1 text-xs text-primary-foreground/50">
+              <button onClick={() => setLang("sw")} className={lang === "sw" ? "text-primary-foreground" : ""}>SW</button>
+              <span>|</span>
+              <button onClick={() => setLang("en")} className={lang === "en" ? "text-primary-foreground" : ""}>EN</button>
+            </div>
           </div>
         </div>
       </footer>
