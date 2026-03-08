@@ -743,6 +743,22 @@ const translations: Record<Lang, Record<string, string>> = {
     "admin.totalApplications": "Total Applications",
     "admin.accepted": "Accepted",
     "admin.leasesSigned": "Leases Signed",
+
+    // Profile
+    "profile.title": "My Profile",
+    "profile.fullName": "Full Name",
+    "profile.email": "Email",
+    "profile.phone": "Phone Number",
+    "profile.role": "Role",
+    "profile.memberSince": "Member Since",
+    "profile.prototypeDate": "January 2026 (Prototype)",
+
+    // Landlord Tenants
+    "landlord.activeTenants": "Active Tenants",
+    "landlord.tenantName": "Tenant Name",
+    "landlord.leaseperiod": "Lease Period",
+    "landlord.rentStatus": "Rent Status",
+    "landlord.lastPayment": "Last Payment",
   },
 };
 
