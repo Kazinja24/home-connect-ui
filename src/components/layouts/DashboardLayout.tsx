@@ -59,7 +59,7 @@ export function DashboardLayout() {
         <Sidebar>
           <SidebarHeader className="p-5 border-b border-sidebar-border">
             <Link to="/" className="flex items-center gap-2 font-bold text-lg text-sidebar-foreground">
-              <Home className="h-5 w-5" strokeWidth={1.5} />
+              <img src={nikonektiLogo} alt="Nikonekti" className="h-7 w-auto brightness-0 invert" />
               Nikonekti
             </Link>
             <p className="text-xs text-sidebar-foreground/60 capitalize mt-1">
