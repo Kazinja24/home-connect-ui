@@ -3,7 +3,7 @@ export type Lang = "sw" | "en";
 const translations: Record<Lang, Record<string, string>> = {
   sw: {
     // Nav & general
-    "app.name": "NIKONEKTI",
+    "app.name": "Kodi",
     "nav.browse": "Vinjari Nyumba",
     "nav.login": "Ingia",
     "nav.register": "Anza Sasa",
