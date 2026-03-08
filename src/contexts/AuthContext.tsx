@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (IS_MOCK_MODE) {
       // In mock mode, check if there's a stored mock user
-      const storedUser = localStorage.getItem("kodi_mock_user");
+      const storedUser = localStorage.getItem("nikonekti_mock_user");
       if (storedUser) {
         try {
           const parsed = JSON.parse(storedUser);
