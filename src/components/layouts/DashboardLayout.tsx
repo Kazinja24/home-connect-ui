@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus, CreditCard, Wallet, Receipt, MessageSquare, Globe, Handshake } from "lucide-react";
+import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus, CreditCard, Wallet, Receipt, MessageSquare, Globe, Handshake, UserCircle } from "lucide-react";
 import type { UserRole } from "@/types";
 
 export function DashboardLayout() {
@@ -19,6 +19,7 @@ export function DashboardLayout() {
 
   const navItems: Record<UserRole, { title: string; url: string; icon: typeof Home }[]> = {
     tenant: [
+      { title: t("profile.title"), url: "/dashboard/profile", icon: UserCircle },
       { title: t("tenant.applications"), url: "/dashboard/applications", icon: ClipboardList },
       { title: t("tenant.viewings"), url: "/dashboard/viewings", icon: Eye },
       { title: t("tenant.leases"), url: "/dashboard/leases", icon: FileText },
@@ -28,6 +29,7 @@ export function DashboardLayout() {
       { title: t("tenant.messages"), url: "/dashboard/messages", icon: MessageSquare },
     ],
     landlord: [
+      { title: t("profile.title"), url: "/dashboard/profile", icon: UserCircle },
       { title: t("landlord.overview"), url: "/dashboard/overview", icon: Home },
       { title: t("landlord.properties"), url: "/dashboard/properties", icon: Building2 },
       { title: t("landlord.applications"), url: "/dashboard/landlord-applications", icon: ClipboardList },
@@ -39,6 +41,7 @@ export function DashboardLayout() {
       { title: t("landlord.messages"), url: "/dashboard/landlord-messages", icon: MessageSquare },
     ],
     admin: [
+      { title: t("profile.title"), url: "/admin/profile", icon: UserCircle },
       { title: t("admin.overview"), url: "/admin/overview", icon: BarChart3 },
       { title: t("admin.users"), url: "/admin/users", icon: Users },
       { title: t("admin.properties"), url: "/admin/properties", icon: Building2 },

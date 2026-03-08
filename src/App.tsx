@@ -15,6 +15,7 @@ import Register from "./pages/Register";
 import Properties from "./pages/Properties";
 import PropertyDetails from "./pages/PropertyDetails";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
 
 import TenantApplications from "./pages/tenant/TenantApplications";
 import TenantViewings from "./pages/tenant/TenantViewings";
@@ -62,6 +63,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
+        <Route path="profile" element={<Profile />} />
         <Route path="applications" element={<TenantApplications />} />
         <Route path="viewings" element={<TenantViewings />} />
         <Route path="leases" element={<TenantLeases />} />
@@ -91,6 +93,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
+        <Route path="profile" element={<Profile />} />
         <Route path="overview" element={<AdminOverview />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="properties" element={<AdminProperties />} />

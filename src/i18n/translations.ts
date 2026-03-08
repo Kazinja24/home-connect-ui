@@ -363,6 +363,22 @@ const translations: Record<Lang, Record<string, string>> = {
     "admin.totalApplications": "Jumla Maombi",
     "admin.accepted": "Yaliyokubaliwa",
     "admin.leasesSigned": "Mikataba Iliyosainiwa",
+
+    // Profile
+    "profile.title": "Wasifu Wangu",
+    "profile.fullName": "Jina Kamili",
+    "profile.email": "Barua pepe",
+    "profile.phone": "Nambari ya Simu",
+    "profile.role": "Jukumu",
+    "profile.memberSince": "Mwanachama Tangu",
+    "profile.prototypeDate": "Januari 2026 (Prototype)",
+
+    // Landlord Tenants
+    "landlord.activeTenants": "Wapangaji Hai",
+    "landlord.tenantName": "Jina la Mpangaji",
+    "landlord.leaseperiod": "Kipindi cha Mkataba",
+    "landlord.rentStatus": "Hali ya Kodi",
+    "landlord.lastPayment": "Malipo ya Mwisho",
   },
 
   en: {
@@ -727,6 +743,22 @@ const translations: Record<Lang, Record<string, string>> = {
     "admin.totalApplications": "Total Applications",
     "admin.accepted": "Accepted",
     "admin.leasesSigned": "Leases Signed",
+
+    // Profile
+    "profile.title": "My Profile",
+    "profile.fullName": "Full Name",
+    "profile.email": "Email",
+    "profile.phone": "Phone Number",
+    "profile.role": "Role",
+    "profile.memberSince": "Member Since",
+    "profile.prototypeDate": "January 2026 (Prototype)",
+
+    // Landlord Tenants
+    "landlord.activeTenants": "Active Tenants",
+    "landlord.tenantName": "Tenant Name",
+    "landlord.leaseperiod": "Lease Period",
+    "landlord.rentStatus": "Rent Status",
+    "landlord.lastPayment": "Last Payment",
   },
 };
 
