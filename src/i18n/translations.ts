@@ -106,7 +106,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.featuredSub": "Zilizochaguliwa kwako",
     "landing.viewAll": "Tazama zote",
     "landing.benefits": "Faida",
-    "landing.whyNikonekti": "Kwa nini Kodi?",
+    "landing.whyNikonekti": "Kwa nini Nikonekti?",
     "landing.forTenants": "Kwa Wapangaji",
     "landing.forLandlords": "Kwa Wamiliki",
     "landing.tenant1": "Vinjari orodha zilizothibitishwa na picha halisi",
