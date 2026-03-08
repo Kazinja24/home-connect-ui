@@ -41,6 +41,7 @@ export function DashboardLayout() {
       { title: t("landlord.messages"), url: "/dashboard/landlord-messages", icon: MessageSquare },
     ],
     admin: [
+      { title: t("profile.title"), url: "/admin/profile", icon: UserCircle },
       { title: t("admin.overview"), url: "/admin/overview", icon: BarChart3 },
       { title: t("admin.users"), url: "/admin/users", icon: Users },
       { title: t("admin.properties"), url: "/admin/properties", icon: Building2 },
