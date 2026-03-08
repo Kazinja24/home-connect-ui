@@ -21,7 +21,7 @@ const delay = (ms = 300) => new Promise((r) => setTimeout(r, ms));
 
 // Track current mock user role from localStorage
 function getCurrentMockUser() {
-  const stored = localStorage.getItem("kodi_mock_user");
+  const stored = localStorage.getItem("nikonekti_mock_user");
   if (stored) {
     try { return JSON.parse(stored); } catch { /* ignore */ }
   }
@@ -38,7 +38,7 @@ export const mockAuth = {
     else if (email.includes("admin")) user = mockUsers.admin;
     else user = { ...mockUsers.tenant, email };
 
-    localStorage.setItem("kodi_mock_user", JSON.stringify(user));
+    localStorage.setItem("nikonekti_mock_user", JSON.stringify(user));
     return { access: "mock-token-xyz", refresh: "mock-refresh-xyz", user };
   },
 
@@ -52,7 +52,7 @@ export const mockAuth = {
       role,
       phone: "",
     };
-    localStorage.setItem("kodi_mock_user", JSON.stringify(user));
+    localStorage.setItem("nikonekti_mock_user", JSON.stringify(user));
     return { access: "mock-token-xyz", refresh: "mock-refresh-xyz", user };
   },
 

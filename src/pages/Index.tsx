@@ -2,10 +2,11 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { PropertyCard } from "@/components/PropertyCard";
-import { Check, ChevronRight, Home, Shield } from "lucide-react";
+import { Check, ChevronRight, Shield } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { Property } from "@/types";
 import { normalizePropertyImages, properties as propertiesApi } from "@/lib/api";
+import heroBg from "@/assets/hero-dar.png";
 
 const Landing = () => {
   const { t } = useLanguage();
@@ -37,71 +38,58 @@ const Landing = () => {
 
   return (
     <div className="bg-background">
-      {/* Hero Section */}
-      <section className="py-16 md:py-24 border-b border-border">
-        <div className="container">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Left: Text content */}
-            <div className="space-y-6">
-              {/* Overline tag */}
-              <p className="tag-label text-primary">TANZANIA'S TRUSTED RENTAL PLATFORM</p>
-              
-              {/* Headline */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight tracking-tight">
-                Pata Nyumba Halisi.<br />
-                <span className="text-primary">Haraka. Salama.</span>
-              </h1>
-              
-              {/* Subtext */}
-              <p className="text-lg text-muted-foreground max-w-lg">
-                Browse verified rentals in Dar es Salaam, Mwanza na Arusha. No fake listings. No wasted trips.
-              </p>
-              
-              {/* CTAs */}
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Button asChild className="h-12 px-6 rounded bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Link to="/properties">Tafuta Nyumba</Link>
-                </Button>
-                <Button asChild variant="outline" className="h-12 px-6 rounded border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                  <Link to="/register?role=landlord">Orodhesha Nyumba</Link>
-                </Button>
-              </div>
-              
-              {/* Trust strip */}
-              <div className="flex flex-wrap gap-6 pt-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" strokeWidth={1.5} />
-                  500+ Orodha Zilizothibitishwa
-                </span>
-                <span className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" strokeWidth={1.5} />
-                  Malipo ya M-Pesa
-                </span>
-                <span className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" strokeWidth={1.5} />
-                  Mikataba ya Kidijitali
-                </span>
-              </div>
+      {/* Hero Section with background image */}
+      <section className="relative min-h-[600px] md:min-h-[700px] border-b border-border overflow-hidden">
+        {/* Background image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${heroBg})` }}
+        >
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
+        </div>
+        
+        {/* Content */}
+        <div className="container relative z-10 py-16 md:py-24">
+          <div className="max-w-xl">
+            {/* Overline tag */}
+            <p className="tag-label text-primary mb-4">TANZANIA'S TRUSTED RENTAL PLATFORM</p>
+            
+            {/* Headline */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight tracking-tight mb-6">
+              Pata Nyumba Halisi.<br />
+              <span className="text-primary">Haraka. Salama.</span>
+            </h1>
+            
+            {/* Subtext */}
+            <p className="text-lg text-muted-foreground max-w-lg mb-8">
+              Browse verified rentals in Dar es Salaam, Mwanza na Arusha. No fake listings. No wasted trips.
+            </p>
+            
+            {/* CTAs */}
+            <div className="flex flex-wrap gap-3 mb-6">
+              <Button asChild className="h-12 px-6 rounded bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link to="/properties">Tafuta Nyumba</Link>
+              </Button>
+              <Button asChild variant="outline" className="h-12 px-6 rounded border-primary text-primary bg-card/80 hover:bg-primary hover:text-primary-foreground">
+                <Link to="/register?role=landlord">Orodhesha Nyumba</Link>
+              </Button>
             </div>
             
-            {/* Right: Property card mockup */}
-            <div className="hidden md:block">
-              <div className="bg-card border border-border rounded-lg p-4 shadow-subtle max-w-sm ml-auto">
-                <div className="aspect-[4/3] bg-muted rounded mb-4 flex items-center justify-center">
-                  <Home className="h-12 w-12 text-muted-foreground/30" strokeWidth={1.5} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="tag-label bg-primary text-primary-foreground px-2 py-0.5 rounded">2 BED</span>
-                    <span className="flex items-center gap-1 text-xs text-accent">
-                      <Shield className="h-3 w-3" strokeWidth={1.5} />
-                      Imethibitishwa
-                    </span>
-                  </div>
-                  <p className="text-xl font-bold text-primary">TZS 450,000/mo</p>
-                  <p className="text-sm text-muted-foreground">Kinondoni, Dar es Salaam</p>
-                </div>
-              </div>
+            {/* Trust strip */}
+            <div className="flex flex-wrap gap-6 pt-4 text-sm text-muted-foreground">
+              <span className="flex items-center gap-2 bg-card/70 px-3 py-1.5 rounded">
+                <Check className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                500+ Orodha Zilizothibitishwa
+              </span>
+              <span className="flex items-center gap-2 bg-card/70 px-3 py-1.5 rounded">
+                <Check className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                Malipo ya M-Pesa
+              </span>
+              <span className="flex items-center gap-2 bg-card/70 px-3 py-1.5 rounded">
+                <Check className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                Mikataba ya Kidijitali
+              </span>
             </div>
           </div>
         </div>
