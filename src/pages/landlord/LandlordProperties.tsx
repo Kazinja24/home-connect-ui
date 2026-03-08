@@ -100,7 +100,7 @@ const LandlordProperties = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => propertiesApi.delete(id),
+    mutationFn: async (id: string) => { await propertiesApi.delete(id); },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["landlord-properties"] });
       toast({ title: t("landlord.propertyDeleted") });
