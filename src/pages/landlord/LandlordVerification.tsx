@@ -9,6 +9,7 @@ import { useLanguage } from '@/i18n/LanguageContext';
 const LandlordVerification: React.FC = () => {
   const { t } = useLanguage();
   const [identity, setIdentity] = useState<File | null>(null);
+  const [selfie, setSelfie] = useState<File | null>(null);
   const [supporting, setSupporting] = useState<File | null>(null);
   const mutation = useVerificationSubmit();
 
