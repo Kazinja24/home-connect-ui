@@ -72,10 +72,13 @@ export const mockAuth = {
 };
 
 // ─── Properties ──────────────────────────────────────────────────
+// Keep a mutable copy so CRUD works within the session
+let localProperties = [...mockProperties];
+
 export const mockPropertiesApi = {
   list: async (params?: Record<string, string>) => {
     await delay();
-    let result = [...mockProperties];
+    let result = [...localProperties];
     if (params?.listing_status) {
       result = result.filter((p) => p.listing_status === params.listing_status);
     }
@@ -87,28 +90,71 @@ export const mockPropertiesApi = {
   },
   get: async (id: string) => {
     await delay();
-    const prop = mockProperties.find((p) => p.id === id);
+    const prop = localProperties.find((p) => p.id === id);
     if (!prop) throw new Error("Property not found");
     return prop;
   },
   create: async (data: any) => {
     await delay();
-    return { id: `p-new-${Date.now()}`, ...data, listing_status: "draft", created_at: new Date().toISOString() };
+    const user = getCurrentMockUser();
+    const newProp = {
+      id: `p-new-${Date.now()}`,
+      title: data.title || "",
+      description: data.description || "",
+      price: Number(data.price) || 0,
+      location: data.location || "",
+      bedrooms: Number(data.bedrooms) || 1,
+      property_type: data.property_type || "apartment",
+      amenities: data.amenities || [],
+      house_rules: data.house_rules || [],
+      images: ["/placeholder.svg"],
+      listing_status: "draft",
+      verification_status: "unverified",
+      owner: user?.id || "l1",
+      owner_name: user?.full_name || "Demo Landlord",
+      created_at: new Date().toISOString(),
+    };
+    localProperties = [newProp, ...localProperties];
+    return newProp;
   },
   update: async (id: string, data: any) => {
     await delay();
-    const prop = mockProperties.find((p) => p.id === id);
-    return { ...prop, ...data };
+    localProperties = localProperties.map((p) => p.id === id ? { ...p, ...data } : p);
+    return localProperties.find((p) => p.id === id);
   },
-  delete: async (_id: string) => { await delay(); return {}; },
+  delete: async (id: string) => {
+    await delay();
+    localProperties = localProperties.filter((p) => p.id !== id);
+    return {};
+  },
   uploadImages: async () => { await delay(); return { images: ["/placeholder.svg"] }; },
-  publish: async (id: string) => { await delay(); return { id, listing_status: "published" }; },
-  unpublish: async (id: string) => { await delay(); return { id, listing_status: "draft" }; },
-  submitForReview: async (id: string) => { await delay(); return { id, listing_status: "pending_review" }; },
+  publish: async (id: string) => {
+    await delay();
+    localProperties = localProperties.map((p) => p.id === id ? { ...p, listing_status: "published" } : p);
+    return { id, listing_status: "published" };
+  },
+  unpublish: async (id: string) => {
+    await delay();
+    localProperties = localProperties.map((p) => p.id === id ? { ...p, listing_status: "draft" } : p);
+    return { id, listing_status: "draft" };
+  },
+  submitForReview: async (id: string) => {
+    await delay();
+    localProperties = localProperties.map((p) => p.id === id ? { ...p, listing_status: "pending_review" } : p);
+    return { id, listing_status: "pending_review" };
+  },
   submitOwnershipDocument: async () => { await delay(); return { status: "submitted" }; },
-  pendingReviews: async () => { await delay(); return mockProperties.filter((p) => p.listing_status === "draft"); },
-  adminApproveListing: async (id: string) => { await delay(); return { id, listing_status: "published" }; },
-  adminRejectListing: async (id: string) => { await delay(); return { id, listing_status: "rejected" }; },
+  pendingReviews: async () => { await delay(); return localProperties.filter((p) => p.listing_status === "draft"); },
+  adminApproveListing: async (id: string) => {
+    await delay();
+    localProperties = localProperties.map((p) => p.id === id ? { ...p, listing_status: "published" } : p);
+    return { id, listing_status: "published" };
+  },
+  adminRejectListing: async (id: string) => {
+    await delay();
+    localProperties = localProperties.map((p) => p.id === id ? { ...p, listing_status: "rejected" } : p);
+    return { id, listing_status: "rejected" };
+  },
   approveVerification: async (id: string) => { await delay(); return { id, verification_status: "verified" }; },
   rejectVerification: async (id: string) => { await delay(); return { id, verification_status: "rejected" }; },
   getConfig: async () => { await delay(50); return { image_max_size_mb: 5 }; },
@@ -260,7 +306,21 @@ export const mockAuditApi = {
 
 // ─── Features ────────────────────────────────────────────────────
 export const mockFeaturesApi = {
-  list: async () => { await delay(); return []; },
+  list: async () => {
+    await delay();
+    return [
+      { id: 1, name: "WiFi" },
+      { id: 2, name: "Parking" },
+      { id: 3, name: "AC" },
+      { id: 4, name: "24/7 Security" },
+      { id: 5, name: "Swimming Pool" },
+      { id: 6, name: "Gym" },
+      { id: 7, name: "Garden" },
+      { id: 8, name: "Elevator" },
+      { id: 9, name: "Water Supply" },
+      { id: 10, name: "Backup Generator" },
+    ];
+  },
 };
 
 // ─── Moderation ──────────────────────────────────────────────────

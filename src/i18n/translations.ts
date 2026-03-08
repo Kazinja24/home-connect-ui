@@ -292,6 +292,9 @@ const translations: Record<Lang, Record<string, string>> = {
     "landlord.propertyUpdated": "Nyumba imesasishwa!",
     "landlord.propertyDeleted": "Nyumba imefutwa!",
     "landlord.noProperties": "Bado huna nyumba zilizoorodheshwa",
+    "landlord.publishFlow": "Mchakato wa Kuchapisha Nyumba",
+    "landlord.publishFlowDesc": "Nyumba zinaanza kama Rasimu. Wasilisha kwa ukaguzi → Msimamizi anakubali → Nyumba inaonekana. Huwezi kuchapisha mwenyewe.",
+    "landlord.submittedForReview": "Nyumba imewasilishwa kwa ukaguzi wa msimamizi.",
 
     // Landlord Viewings
     "landlord.viewingRequests": "Maombi ya Kuona",
@@ -672,6 +675,9 @@ const translations: Record<Lang, Record<string, string>> = {
     "landlord.propertyUpdated": "Property updated!",
     "landlord.propertyDeleted": "Property deleted!",
     "landlord.noProperties": "No properties listed yet",
+    "landlord.publishFlow": "Property Publishing Flow",
+    "landlord.publishFlowDesc": "Properties start as Draft. Submit for review → Admin approves → Property goes live. You cannot self-publish.",
+    "landlord.submittedForReview": "Property submitted for admin review.",
 
     // Landlord Viewings
     "landlord.viewingRequests": "Viewing Requests",
