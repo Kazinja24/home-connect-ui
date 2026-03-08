@@ -118,7 +118,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "landing.landlord3": "Kagua maombi na taarifa za wapangaji",
     "landing.landlord4": "Tengeneza na uchapishie mikataba ya kukodisha",
     "landing.ctaTitle": "Uko tayari kuanza?",
-    "landing.ctaSub": "Jiunge na maelfu ya wapangaji na wamiliki kwenye NIKONEKTI.",
+    "landing.ctaSub": "Jiunge na maelfu ya wapangaji na wamiliki kwenye Kodi.",
     "landing.registerTenant": "Jisajili kama Mpangaji",
     "landing.registerLandlord": "Jisajili kama Mmiliki",
     "landing.available": "Inapatikana",
