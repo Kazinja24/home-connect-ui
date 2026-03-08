@@ -14,7 +14,7 @@ export function PublicLayout() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <img src={nikonektiLogo} alt="Nikonekti" className="h-8 w-auto" />
-            <span className="font-bold text-xl text-primary tracking-tight">Nikonekti</span>
+            <span className="font-bold text-xl text-primary tracking-tight">NIKONEKTI</span>
           </Link>
 
           {/* Right side */}
