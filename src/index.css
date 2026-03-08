@@ -4,35 +4,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* KODI Design System — Deep green + warm amber, clean & structured */
+/* NIKONEKTI Design System — Navy & Gold, professional & premium */
 
 @layer base {
   :root {
-    /* Primary: #1B4332 deep green */
-    --primary: 153 43% 18%;
+    /* Primary: #1A2B4A rich navy */
+    --primary: 217 48% 20%;
     --primary-foreground: 0 0% 100%;
 
-    /* Background: #F9F6F1 warm off-white */
-    --background: 37 47% 96%;
-    --foreground: 0 0% 10%;
+    /* Background: #F7F5F2 warm off-white */
+    --background: 30 20% 96%;
+    --foreground: 220 30% 12%;
 
     /* Surface/Card: #FFFFFF */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --card-foreground: 220 30% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
+    --popover-foreground: 220 30% 12%;
 
     /* Secondary/Muted */
-    --secondary: 35 18% 92%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 220 30% 12%;
 
-    --muted: 35 18% 92%;
-    --muted-foreground: 27 5% 40%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 220 8% 45%;
 
-    /* Accent: #D97706 amber */
-    --accent: 32 95% 44%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent: #E5A100 golden amber */
+    --accent: 43 100% 45%;
+    --accent-foreground: 220 30% 12%;
 
     /* Destructive/Error: #991B1B */
     --destructive: 0 70% 35%;
@@ -42,26 +42,26 @@
     --success: 143 64% 24%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning: same as accent */
-    --warning: 32 95% 44%;
-    --warning-foreground: 0 0% 100%;
+    /* Warning */
+    --warning: 43 100% 45%;
+    --warning-foreground: 220 30% 12%;
 
-    /* Border: #E2DDD6 */
-    --border: 35 18% 86%;
-    --input: 35 18% 86%;
-    --ring: 153 43% 18%;
+    /* Border: #E0DCD6 */
+    --border: 30 14% 86%;
+    --input: 30 14% 86%;
+    --ring: 217 48% 20%;
 
     --radius: 0.375rem;
 
-    /* Sidebar: dark green */
-    --sidebar-background: 153 43% 18%;
-    --sidebar-foreground: 37 47% 96%;
-    --sidebar-primary: 32 95% 44%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 153 35% 24%;
-    --sidebar-accent-foreground: 37 47% 96%;
-    --sidebar-border: 153 30% 25%;
-    --sidebar-ring: 32 95% 44%;
+    /* Sidebar: navy */
+    --sidebar-background: 217 48% 20%;
+    --sidebar-foreground: 30 20% 96%;
+    --sidebar-primary: 43 100% 45%;
+    --sidebar-primary-foreground: 220 30% 12%;
+    --sidebar-accent: 217 40% 28%;
+    --sidebar-accent-foreground: 30 20% 96%;
+    --sidebar-border: 217 35% 28%;
+    --sidebar-ring: 43 100% 45%;
   }
 
   .dark {
