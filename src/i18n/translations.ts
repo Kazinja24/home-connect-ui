@@ -292,6 +292,9 @@ const translations: Record<Lang, Record<string, string>> = {
     "landlord.propertyUpdated": "Nyumba imesasishwa!",
     "landlord.propertyDeleted": "Nyumba imefutwa!",
     "landlord.noProperties": "Bado huna nyumba zilizoorodheshwa",
+    "landlord.publishFlow": "Mchakato wa Kuchapisha Nyumba",
+    "landlord.publishFlowDesc": "Nyumba zinaanza kama Rasimu. Wasilisha kwa ukaguzi → Msimamizi anakubali → Nyumba inaonekana. Huwezi kuchapisha mwenyewe.",
+    "landlord.submittedForReview": "Nyumba imewasilishwa kwa ukaguzi wa msimamizi.",
 
     // Landlord Viewings
     "landlord.viewingRequests": "Maombi ya Kuona",
