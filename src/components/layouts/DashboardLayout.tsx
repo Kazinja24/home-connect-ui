@@ -7,7 +7,7 @@ import {
   SidebarMenuButton, SidebarTrigger, SidebarInset, SidebarGroup, SidebarGroupLabel, SidebarGroupContent,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus, CreditCard, Wallet, Receipt, MessageSquare, Handshake, UserCircle } from "lucide-react";
+import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus, CreditCard, Wallet, Receipt, MessageSquare, Handshake, UserCircle, ShieldCheck, Flag } from "lucide-react";
 import type { UserRole } from "@/types";
 import nikonektiLogo from "@/assets/nikonekti-logo.png";
 
@@ -43,10 +43,12 @@ export function DashboardLayout() {
     admin: [
       { title: t("profile.title"), url: "/admin/profile", icon: UserCircle },
       { title: t("admin.overview"), url: "/admin/overview", icon: BarChart3 },
-      { title: t("admin.users"), url: "/admin/users", icon: Users },
+      { title: lang === "sw" ? "Uthibitisho" : "Verifications", url: "/admin/verifications", icon: ShieldCheck },
       { title: t("admin.properties"), url: "/admin/properties", icon: Building2 },
+      { title: t("admin.users"), url: "/admin/users", icon: Users },
+      { title: lang === "sw" ? "Ripoti" : "Reports", url: "/admin/reports", icon: Flag },
       { title: t("admin.analytics"), url: "/admin/analytics", icon: BarChart3 },
-      { title: "Lifecycle Logs", url: "/admin/lifecycle", icon: Shield },
+      { title: lang === "sw" ? "Kumbukumbu" : "Audit Logs", url: "/admin/lifecycle", icon: Shield },
     ],
   };
 

@@ -42,6 +42,8 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminProperties from "./pages/admin/AdminProperties";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminLifecycle from "./pages/admin/AdminLifecycle";
+import AdminVerifications from "./pages/admin/AdminVerifications";
+import AdminReports from "./pages/admin/AdminReports";
 
 const queryClient = new QueryClient();
 
@@ -101,6 +103,8 @@ function AppRoutes() {
         <Route path="properties" element={<AdminProperties />} />
         <Route path="analytics" element={<AdminAnalytics />} />
         <Route path="lifecycle" element={<AdminLifecycle />} />
+        <Route path="verifications" element={<AdminVerifications />} />
+        <Route path="reports" element={<AdminReports />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
