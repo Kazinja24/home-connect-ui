@@ -7,7 +7,7 @@ import {
   SidebarMenuButton, SidebarTrigger, SidebarInset, SidebarGroup, SidebarGroupLabel, SidebarGroupContent,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus, CreditCard, Wallet, Receipt, MessageSquare, Handshake, UserCircle } from "lucide-react";
+import { Home, Building2, Eye, FileText, ClipboardList, Users, BarChart3, Shield, LogOut, Plus, CreditCard, Wallet, Receipt, MessageSquare, Handshake, UserCircle, ShieldCheck, Flag } from "lucide-react";
 import type { UserRole } from "@/types";
 import nikonektiLogo from "@/assets/nikonekti-logo.png";
 
