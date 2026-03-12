@@ -103,6 +103,8 @@ function AppRoutes() {
         <Route path="properties" element={<AdminProperties />} />
         <Route path="analytics" element={<AdminAnalytics />} />
         <Route path="lifecycle" element={<AdminLifecycle />} />
+        <Route path="verifications" element={<AdminVerifications />} />
+        <Route path="reports" element={<AdminReports />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

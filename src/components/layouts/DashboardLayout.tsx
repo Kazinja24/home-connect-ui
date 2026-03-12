@@ -43,10 +43,12 @@ export function DashboardLayout() {
     admin: [
       { title: t("profile.title"), url: "/admin/profile", icon: UserCircle },
       { title: t("admin.overview"), url: "/admin/overview", icon: BarChart3 },
-      { title: t("admin.users"), url: "/admin/users", icon: Users },
+      { title: lang === "sw" ? "Uthibitisho" : "Verifications", url: "/admin/verifications", icon: ShieldCheck },
       { title: t("admin.properties"), url: "/admin/properties", icon: Building2 },
+      { title: t("admin.users"), url: "/admin/users", icon: Users },
+      { title: lang === "sw" ? "Ripoti" : "Reports", url: "/admin/reports", icon: Flag },
       { title: t("admin.analytics"), url: "/admin/analytics", icon: BarChart3 },
-      { title: "Lifecycle Logs", url: "/admin/lifecycle", icon: Shield },
+      { title: lang === "sw" ? "Kumbukumbu" : "Audit Logs", url: "/admin/lifecycle", icon: Shield },
     ],
   };
 
