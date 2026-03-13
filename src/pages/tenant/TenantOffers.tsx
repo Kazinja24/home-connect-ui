@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { offers as offersApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { CheckCircle2, XCircle, MessageSquare, FileText, Home, Banknote, Shield, Calendar } from "lucide-react";
 
 const TenantOffers = () => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -30,20 +32,20 @@ const TenantOffers = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tenant-offers"] });
       queryClient.invalidateQueries({ queryKey: ["tenant-leases"] });
-      toast({ title: "Umekubali ofa! Mkataba unaandaliwa." });
+      toast({ title: t("offers.offerAccepted") });
       closeDialog();
     },
-    onError: (err: any) => toast({ title: err.message || "Imeshindikana kukubali ofa", variant: "destructive" }),
+    onError: (err: any) => toast({ title: err.message || t("offers.acceptFailed"), variant: "destructive" }),
   });
 
   const rejectMutation = useMutation({
     mutationFn: ({ id, note }: { id: string; note: string }) => offersApi.reject(id, note),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tenant-offers"] });
-      toast({ title: "Ofa imekataliwa." });
+      toast({ title: t("offers.offerDeclined") });
       closeDialog();
     },
-    onError: (err: any) => toast({ title: err.message || "Imeshindikana kukataa ofa", variant: "destructive" }),
+    onError: (err: any) => toast({ title: err.message || t("offers.declineFailed"), variant: "destructive" }),
   });
 
   const closeDialog = () => {
@@ -54,10 +56,10 @@ const TenantOffers = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "sent": return "Mpya";
-      case "accepted": return "Imekubaliwa";
-      case "rejected": return "Imekataliwa";
-      case "withdrawn": return "Imeondolewa";
+      case "sent": return t("offers.statusNew");
+      case "accepted": return t("offers.statusAccepted");
+      case "rejected": return t("offers.statusRejected");
+      case "withdrawn": return t("offers.statusRemoved");
       default: return status;
     }
   };
@@ -76,8 +78,8 @@ const TenantOffers = () => {
   return (
     <div className="space-y-6 animate-slide-up">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Ofa za Kukodisha</h1>
-        <p className="text-sm text-muted-foreground mt-1">Pitia na ujibu ofa kutoka kwa wamiliki</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("offers.rentalOffers")}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t("offers.reviewOffers")}</p>
       </div>
 
       {/* Pending Offers */}
@@ -86,59 +88,56 @@ const TenantOffers = () => {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Banknote className="h-5 w-5 text-primary" strokeWidth={1.5} />
-              Ofa Mpya ({pendingOffers.length})
+              {t("offers.newOffers")} ({pendingOffers.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {pendingOffers.map((offer: any) => (
               <div key={offer.id} className="bg-card border border-border rounded-lg p-5 space-y-4">
-                {/* Property info */}
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-foreground text-lg">{offer.property_title || `Nyumba #${offer.property}`}</h3>
+                    <h3 className="font-semibold text-foreground text-lg">{offer.property_title || `#${offer.property}`}</h3>
                     <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
                       <Home className="h-3.5 w-3.5" />
-                      Mmiliki: {offer.landlord_name || "Mmiliki"}
+                      {t("offers.landlord")}: {offer.landlord_name || t("offers.landlord")}
                     </p>
                   </div>
-                  <Badge variant="secondary" className="text-primary border-primary/30">Mpya</Badge>
+                  <Badge variant="secondary" className="text-primary border-primary/30">{t("offers.statusNew")}</Badge>
                 </div>
 
-                {/* Offer details grid */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground">Kodi ya Mwezi</p>
+                    <p className="text-xs text-muted-foreground">{t("offers.monthlyRentLabel")}</p>
                     <p className="text-lg font-bold text-foreground">TZS {Number(offer.monthly_rent || 0).toLocaleString()}</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground">Amana / Deposit</p>
+                    <p className="text-xs text-muted-foreground">{t("offers.depositLabelShort")}</p>
                     <p className="text-lg font-bold text-foreground">TZS {Number(offer.security_deposit || 0).toLocaleString()}</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" /> Tarehe ya Kuingia</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" /> {t("offers.moveIn")}</p>
                     <p className="font-semibold text-foreground">{offer.start_date || "—"}</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground">Muda wa Mkataba</p>
-                    <p className="font-semibold text-foreground">{offer.end_date ? `Hadi ${offer.end_date}` : "Wazi"}</p>
+                    <p className="text-xs text-muted-foreground">{t("offers.leasePeriod")}</p>
+                    <p className="font-semibold text-foreground">{offer.end_date ? `${t("offers.until")} ${offer.end_date}` : t("offers.open")}</p>
                   </div>
                 </div>
 
                 {offer.landlord_note && (
                   <div className="bg-muted/30 rounded-lg p-3 text-sm">
-                    <p className="text-xs text-muted-foreground mb-1">Ujumbe wa Mmiliki:</p>
+                    <p className="text-xs text-muted-foreground mb-1">{t("offers.landlordMessage")}:</p>
                     <p className="text-foreground">{offer.landlord_note}</p>
                   </div>
                 )}
 
-                {/* Action buttons */}
                 <div className="flex gap-2 pt-1">
                   <Button
                     className="flex-1 rounded"
                     onClick={() => { setSelectedOffer(offer); setAction("accept"); }}
                   >
                     <CheckCircle2 className="h-4 w-4 mr-1.5" />
-                    Kubali Ofa
+                    {t("offers.acceptOffer")}
                   </Button>
                   <Button
                     variant="outline"
@@ -146,7 +145,7 @@ const TenantOffers = () => {
                     onClick={() => { setSelectedOffer(offer); setAction("negotiate"); }}
                   >
                     <MessageSquare className="h-4 w-4 mr-1.5" />
-                    Jadili
+                    {t("offers.negotiate")}
                   </Button>
                   <Button
                     variant="ghost"
@@ -167,7 +166,7 @@ const TenantOffers = () => {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <FileText className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-            Historia ya Ofa
+            {t("offers.offerHistory")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -178,9 +177,9 @@ const TenantOffers = () => {
               <div key={offer.id} className="border border-border rounded-lg p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-foreground">{offer.property_title || `Nyumba #${offer.property}`}</p>
+                    <p className="font-semibold text-foreground">{offer.property_title || `#${offer.property}`}</p>
                     <p className="text-xs text-muted-foreground">
-                      TZS {Number(offer.monthly_rent || 0).toLocaleString()}/mwezi • {offer.start_date || "—"}
+                      TZS {Number(offer.monthly_rent || 0).toLocaleString()}{t("offers.perMonth")} • {offer.start_date || "—"}
                     </p>
                   </div>
                   <Badge variant={getStatusVariant(offer.status)}>{getStatusLabel(offer.status)}</Badge>
@@ -193,13 +192,13 @@ const TenantOffers = () => {
                     onClick={() => navigate("/agreement")}
                   >
                     <FileText className="h-3 w-3 mr-1" />
-                    Tazama Mkataba
+                    {t("offers.viewAgreement")}
                   </Button>
                 )}
               </div>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">Hakuna ofa za awali.</p>
+            <p className="text-sm text-muted-foreground text-center py-8">{t("offers.noHistory")}</p>
           )}
         </CardContent>
       </Card>
@@ -210,29 +209,29 @@ const TenantOffers = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-primary" />
-              Kubali Ofa
+              {t("offers.acceptTitle")}
             </DialogTitle>
             <DialogDescription>
-              Kwa kukubali, mkataba wa kukodisha utaandaliwa na utahitaji kuthibitishwa na pande zote mbili.
+              {t("offers.acceptDesc")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-sm">
-            <p><span className="text-muted-foreground">Nyumba:</span> <strong>{selectedOffer?.property_title}</strong></p>
-            <p><span className="text-muted-foreground">Kodi:</span> <strong>TZS {Number(selectedOffer?.monthly_rent || 0).toLocaleString()}</strong>/mwezi</p>
-            <p><span className="text-muted-foreground">Amana:</span> <strong>TZS {Number(selectedOffer?.security_deposit || 0).toLocaleString()}</strong></p>
-            <p><span className="text-muted-foreground">Kuanzia:</span> <strong>{selectedOffer?.start_date}</strong></p>
+            <p><span className="text-muted-foreground">{t("offers.property")}:</span> <strong>{selectedOffer?.property_title}</strong></p>
+            <p><span className="text-muted-foreground">{t("offers.rent")}:</span> <strong>TZS {Number(selectedOffer?.monthly_rent || 0).toLocaleString()}</strong>{t("offers.perMonth")}</p>
+            <p><span className="text-muted-foreground">{t("offers.depositLabel")}:</span> <strong>TZS {Number(selectedOffer?.security_deposit || 0).toLocaleString()}</strong></p>
+            <p><span className="text-muted-foreground">{t("offers.from")}:</span> <strong>{selectedOffer?.start_date}</strong></p>
           </div>
 
           <div className="flex items-start gap-2 text-xs text-muted-foreground bg-primary/5 rounded-lg p-3">
             <Shield className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-            <span>Mkataba utaandaliwa kwa Kiswahili na utahitaji OTP kuthibitisha. Nyumba itawekwa RESERVED hadi mkataba ukamilike.</span>
+            <span>{t("offers.acceptSecurity")}</span>
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Ujumbe kwa Mmiliki (Hiari)</Label>
+            <Label className="text-xs text-muted-foreground">{t("offers.noteToLandlord")}</Label>
             <Textarea
-              placeholder="Asante, nakubali masharti..."
+              placeholder={t("offers.acceptPlaceholder")}
               value={tenantNote}
               onChange={(e) => setTenantNote(e.target.value)}
               className="rounded resize-none"
@@ -241,9 +240,9 @@ const TenantOffers = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={closeDialog} className="rounded">Ghairi</Button>
+            <Button variant="outline" onClick={closeDialog} className="rounded">{t("offers.cancel")}</Button>
             <Button onClick={() => acceptMutation.mutate(String(selectedOffer?.id))} disabled={acceptMutation.isPending} className="rounded">
-              {acceptMutation.isPending ? "Inakubali..." : "Kubali Ofa"}
+              {acceptMutation.isPending ? t("offers.accepting") : t("offers.acceptBtn")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -255,22 +254,22 @@ const TenantOffers = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-primary" />
-              Jadili Ofa
+              {t("offers.negotiateTitle")}
             </DialogTitle>
             <DialogDescription>
-              Tuma ujumbe kwa mmiliki kuhusu masharti unayopendekeza kubadilisha.
+              {t("offers.negotiateDesc")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1">
-            <p className="text-muted-foreground">Ofa ya sasa: <strong className="text-foreground">TZS {Number(selectedOffer?.monthly_rent || 0).toLocaleString()}</strong>/mwezi</p>
-            <p className="text-muted-foreground">Amana: <strong className="text-foreground">TZS {Number(selectedOffer?.security_deposit || 0).toLocaleString()}</strong></p>
+            <p className="text-muted-foreground">{t("offers.currentOffer")}: <strong className="text-foreground">TZS {Number(selectedOffer?.monthly_rent || 0).toLocaleString()}</strong>{t("offers.perMonth")}</p>
+            <p className="text-muted-foreground">{t("offers.depositLabel")}: <strong className="text-foreground">TZS {Number(selectedOffer?.security_deposit || 0).toLocaleString()}</strong></p>
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Mapendekezo Yako</Label>
+            <Label className="text-xs text-muted-foreground">{t("offers.yourSuggestions")}</Label>
             <Textarea
-              placeholder="Naomba bei ipunguzwe kidogo... / Naomba kuingia tarehe tofauti..."
+              placeholder={t("offers.negotiatePlaceholder")}
               value={tenantNote}
               onChange={(e) => setTenantNote(e.target.value)}
               className="rounded resize-none"
@@ -279,14 +278,14 @@ const TenantOffers = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={closeDialog} className="rounded">Ghairi</Button>
+            <Button variant="outline" onClick={closeDialog} className="rounded">{t("offers.cancel")}</Button>
             <Button
               onClick={() => rejectMutation.mutate({ id: String(selectedOffer?.id), note: `[NEGOTIATE] ${tenantNote}` })}
               disabled={rejectMutation.isPending || !tenantNote.trim()}
               variant="outline"
               className="rounded"
             >
-              {rejectMutation.isPending ? "Inatuma..." : "Tuma Mapendekezo"}
+              {rejectMutation.isPending ? t("offers.sendingSuggestions") : t("offers.sendSuggestions")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -298,17 +297,17 @@ const TenantOffers = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <XCircle className="h-5 w-5" />
-              Kataa Ofa
+              {t("offers.declineTitle")}
             </DialogTitle>
             <DialogDescription>
-              Tafadhali eleza sababu ya kukataa ili mmiliki apate maoni.
+              {t("offers.declineDesc")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Sababu ya Kukataa</Label>
+            <Label className="text-xs text-muted-foreground">{t("offers.declineReason")}</Label>
             <Textarea
-              placeholder="Bei ni kubwa... / Nimepata nyumba nyingine..."
+              placeholder={t("offers.declinePlaceholder")}
               value={tenantNote}
               onChange={(e) => setTenantNote(e.target.value)}
               className="rounded resize-none"
@@ -317,14 +316,14 @@ const TenantOffers = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={closeDialog} className="rounded">Ghairi</Button>
+            <Button variant="outline" onClick={closeDialog} className="rounded">{t("offers.cancel")}</Button>
             <Button
               variant="destructive"
               onClick={() => rejectMutation.mutate({ id: String(selectedOffer?.id), note: tenantNote })}
               disabled={rejectMutation.isPending || !tenantNote.trim()}
               className="rounded"
             >
-              {rejectMutation.isPending ? "Inakataa..." : "Kataa Ofa"}
+              {rejectMutation.isPending ? t("offers.declining") : t("offers.declineBtn")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -334,8 +333,8 @@ const TenantOffers = () => {
       {!isLoading && (!data || data.length === 0) && (
         <div className="text-center py-16">
           <Banknote className="h-10 w-10 text-muted-foreground mx-auto mb-3" strokeWidth={1} />
-          <p className="text-muted-foreground">Bado hujapokea ofa yoyote.</p>
-          <p className="text-xs text-muted-foreground mt-1">Ofa zitaonekana hapa baada ya mmiliki kukutumia.</p>
+          <p className="text-muted-foreground">{t("offers.noOffersReceived")}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t("offers.willAppear")}</p>
         </div>
       )}
     </div>
