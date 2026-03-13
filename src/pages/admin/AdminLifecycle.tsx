@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { audit as auditApi } from "@/lib/api";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const AdminLifecycle = () => {
+  const { t } = useLanguage();
   const [filters, setFilters] = useState({
     action_prefix: "",
     entity_type: "",
@@ -27,35 +29,35 @@ const AdminLifecycle = () => {
 
   return (
     <div className="space-y-6 animate-slide-up">
-      <h1 className="text-2xl font-bold text-foreground">Lifecycle Audit</h1>
+      <h1 className="text-2xl font-bold text-foreground">{t("admin.lifecycleTitle")}</h1>
       <Card className="glass-strong border-border/30">
         <CardHeader>
-          <CardTitle className="text-lg">Filters</CardTitle>
+          <CardTitle className="text-lg">{t("admin.filters")}</CardTitle>
         </CardHeader>
         <CardContent className="grid md:grid-cols-5 gap-3">
           <div className="space-y-1">
-            <Label>Action prefix</Label>
+            <Label>{t("admin.actionPrefix")}</Label>
             <Input value={filters.action_prefix} onChange={(e) => setFilters((f) => ({ ...f, action_prefix: e.target.value }))} />
           </div>
           <div className="space-y-1">
-            <Label>Entity type</Label>
+            <Label>{t("admin.entityType")}</Label>
             <Input value={filters.entity_type} onChange={(e) => setFilters((f) => ({ ...f, entity_type: e.target.value }))} />
           </div>
           <div className="space-y-1">
-            <Label>Entity ID</Label>
+            <Label>{t("admin.entityId")}</Label>
             <Input value={filters.entity_id} onChange={(e) => setFilters((f) => ({ ...f, entity_id: e.target.value }))} />
           </div>
           <div className="space-y-1">
-            <Label>Created from</Label>
+            <Label>{t("admin.createdFrom")}</Label>
             <Input type="date" value={filters.created_from} onChange={(e) => setFilters((f) => ({ ...f, created_from: e.target.value }))} />
           </div>
           <div className="space-y-1">
-            <Label>Created to</Label>
+            <Label>{t("admin.createdTo")}</Label>
             <Input type="date" value={filters.created_to} onChange={(e) => setFilters((f) => ({ ...f, created_to: e.target.value }))} />
           </div>
           <div className="md:col-span-5">
             <Button onClick={() => refetch()} disabled={isFetching}>
-              {isFetching ? "Refreshing..." : "Apply filters"}
+              {isFetching ? t("admin.refreshing") : t("admin.applyFilters")}
             </Button>
           </div>
         </CardContent>
@@ -63,7 +65,7 @@ const AdminLifecycle = () => {
 
       <Card className="glass-strong border-border/30">
         <CardHeader>
-          <CardTitle className="text-lg">Events</CardTitle>
+          <CardTitle className="text-lg">{t("admin.events")}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -72,11 +74,11 @@ const AdminLifecycle = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Actor</TableHead>
-                  <TableHead>Target</TableHead>
-                  <TableHead>Object ID</TableHead>
+                  <TableHead>{t("admin.created")}</TableHead>
+                  <TableHead>{t("admin.action")}</TableHead>
+                  <TableHead>{t("admin.actor")}</TableHead>
+                  <TableHead>{t("admin.target")}</TableHead>
+                  <TableHead>{t("admin.objectId")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -93,7 +95,7 @@ const AdminLifecycle = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                      No lifecycle events found.
+                      {t("admin.noEvents")}
                     </TableCell>
                   </TableRow>
                 )}

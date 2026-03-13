@@ -15,16 +15,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { cn } from "@/lib/utils";
 import { applications as appApi, viewings as viewingsApi, offers as offersApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { CalendarIcon, Send, XCircle, Clock, CheckCircle2, AlertTriangle, FileText } from "lucide-react";
 
-const LEASE_DURATIONS = [
-  { value: "6", label: "Miezi 6" },
-  { value: "12", label: "Mwaka 1" },
-  { value: "24", label: "Miaka 2" },
-  { value: "open", label: "Wazi (Open-ended)" },
-];
-
 const LandlordOffers = () => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [applicationId, setApplicationId] = useState("");
@@ -35,6 +30,13 @@ const LandlordOffers = () => {
   const [leaseDuration, setLeaseDuration] = useState("");
   const [landlordNote, setLandlordNote] = useState("");
   const [showForm, setShowForm] = useState(false);
+
+  const LEASE_DURATIONS = [
+    { value: "6", label: t("offers.months6") },
+    { value: "12", label: t("offers.year1") },
+    { value: "24", label: t("offers.years2") },
+    { value: "open", label: t("offers.openEnded") },
+  ];
 
   const { data: applications = [] } = useQuery({
     queryKey: ["landlord-applications-for-offers"],
@@ -77,20 +79,20 @@ const LandlordOffers = () => {
         lease_duration: leaseDuration,
       }),
     onSuccess: () => {
-      toast({ title: "Ofa imetumwa kwa mpangaji." });
+      toast({ title: t("offers.offerSent") });
       queryClient.invalidateQueries({ queryKey: ["landlord-offers"] });
       resetForm();
     },
-    onError: (err: any) => toast({ title: err.message || "Imeshindikana kutuma ofa", variant: "destructive" }),
+    onError: (err: any) => toast({ title: err.message || t("offers.sendFailed"), variant: "destructive" }),
   });
 
   const withdrawMutation = useMutation({
     mutationFn: (id: string) => offersApi.withdraw(id),
     onSuccess: () => {
-      toast({ title: "Ofa imefutwa." });
+      toast({ title: t("offers.offerWithdrawn") });
       queryClient.invalidateQueries({ queryKey: ["landlord-offers"] });
     },
-    onError: (err: any) => toast({ title: err.message || "Imeshindikana kufuta ofa", variant: "destructive" }),
+    onError: (err: any) => toast({ title: err.message || t("offers.withdrawFailed"), variant: "destructive" }),
   });
 
   const resetForm = () => {
@@ -115,11 +117,11 @@ const LandlordOffers = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "sent": return "Imetumwa";
-      case "accepted": return "Imekubaliwa";
-      case "rejected": return "Imekataliwa";
-      case "negotiating": return "Mazungumzo";
-      case "withdrawn": return "Imefutwa";
+      case "sent": return t("offers.statusSent");
+      case "accepted": return t("offers.statusAccepted");
+      case "rejected": return t("offers.statusRejected");
+      case "negotiating": return t("offers.statusNegotiating");
+      case "withdrawn": return t("offers.statusWithdrawn");
       default: return status;
     }
   };
@@ -128,12 +130,12 @@ const LandlordOffers = () => {
     <div className="space-y-6 animate-slide-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Ofa za Kukodisha</h1>
-          <p className="text-sm text-muted-foreground mt-1">Tuma ofa kwa wapangaji baada ya kutazama nyumba</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("offers.rentalOffers")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("offers.sendAfterViewing")}</p>
         </div>
         <Button onClick={() => setShowForm(true)} className="rounded">
           <Send className="h-4 w-4 mr-2" strokeWidth={1.5} />
-          Ofa Mpya
+          {t("offers.newOffer")}
         </Button>
       </div>
 
@@ -141,60 +143,56 @@ const LandlordOffers = () => {
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Tuma Ofa ya Kukodisha</DialogTitle>
+            <DialogTitle>{t("offers.sendOffer")}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Application select */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Ombi Lililokubaliwa</Label>
+              <Label className="text-xs text-muted-foreground">{t("offers.approvedApplication")}</Label>
               <Select value={applicationId} onValueChange={setApplicationId}>
-                <SelectTrigger className="rounded"><SelectValue placeholder="Chagua ombi" /></SelectTrigger>
+                <SelectTrigger className="rounded"><SelectValue placeholder={t("offers.selectApplication")} /></SelectTrigger>
                 <SelectContent>
                   {applications.map((a: any) => (
                     <SelectItem key={a.id} value={String(a.id)}>
-                      {a.property_title || `Nyumba #${a.property}`} — {a.tenant_name || `Mpangaji #${a.tenant}`}
+                      {a.property_title || `#${a.property}`} — {a.tenant_name || `#${a.tenant}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Viewing select */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Kutazama Kulikokamilika</Label>
+              <Label className="text-xs text-muted-foreground">{t("offers.completedViewing")}</Label>
               <Select value={viewingId} onValueChange={setViewingId}>
-                <SelectTrigger className="rounded"><SelectValue placeholder="Chagua kutazama" /></SelectTrigger>
+                <SelectTrigger className="rounded"><SelectValue placeholder={t("offers.selectViewing")} /></SelectTrigger>
                 <SelectContent>
                   {completedViewings.map((v: any) => (
                     <SelectItem key={v.id} value={String(v.id)}>
-                      {v.property_title || `Nyumba #${v.property}`} — {v.tenant_name || `Mpangaji #${v.tenant}`}
+                      {v.property_title || `#${v.property}`} — {v.tenant_name || `#${v.tenant}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Rent & Deposit */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Kodi ya Mwezi (TZS)</Label>
+                <Label className="text-xs text-muted-foreground">{t("offers.monthlyRent")}</Label>
                 <Input type="number" placeholder="800,000" value={monthlyRent} onChange={(e) => setMonthlyRent(e.target.value)} className="rounded" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Amana / Deposit (TZS)</Label>
+                <Label className="text-xs text-muted-foreground">{t("offers.deposit")}</Label>
                 <Input type="number" placeholder="800,000" value={securityDeposit} onChange={(e) => setSecurityDeposit(e.target.value)} className="rounded" />
               </div>
             </div>
 
-            {/* Move-in Date */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Tarehe ya Kuingia</Label>
+              <Label className="text-xs text-muted-foreground">{t("offers.moveInDate")}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className={cn("w-full justify-start text-left font-normal rounded", !moveInDate && "text-muted-foreground")}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {moveInDate ? format(moveInDate, "dd MMM yyyy") : "Chagua tarehe"}
+                    {moveInDate ? format(moveInDate, "dd MMM yyyy") : t("offers.selectDate")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -210,11 +208,10 @@ const LandlordOffers = () => {
               </Popover>
             </div>
 
-            {/* Lease Duration */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Muda wa Mkataba</Label>
+              <Label className="text-xs text-muted-foreground">{t("offers.leaseDuration")}</Label>
               <Select value={leaseDuration} onValueChange={setLeaseDuration}>
-                <SelectTrigger className="rounded"><SelectValue placeholder="Chagua muda" /></SelectTrigger>
+                <SelectTrigger className="rounded"><SelectValue placeholder={t("offers.selectDuration")} /></SelectTrigger>
                 <SelectContent>
                   {LEASE_DURATIONS.map((d) => (
                     <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
@@ -223,25 +220,23 @@ const LandlordOffers = () => {
               </Select>
             </div>
 
-            {/* Summary preview */}
             {monthlyRent && securityDeposit && moveInDate && leaseDuration && (
               <div className="bg-muted/50 rounded-lg p-3 space-y-1 text-sm">
-                <p className="font-medium text-foreground">Muhtasari wa Ofa</p>
-                <p className="text-muted-foreground">Kodi: <span className="text-foreground font-semibold">TZS {Number(monthlyRent).toLocaleString()}</span>/mwezi</p>
-                <p className="text-muted-foreground">Amana: <span className="text-foreground font-semibold">TZS {Number(securityDeposit).toLocaleString()}</span></p>
-                <p className="text-muted-foreground">Kuanzia: <span className="text-foreground font-semibold">{format(moveInDate, "dd MMM yyyy")}</span></p>
-                <p className="text-muted-foreground">Muda: <span className="text-foreground font-semibold">{LEASE_DURATIONS.find(d => d.value === leaseDuration)?.label}</span></p>
+                <p className="font-medium text-foreground">{t("offers.summary")}</p>
+                <p className="text-muted-foreground">{t("offers.rent")}: <span className="text-foreground font-semibold">TZS {Number(monthlyRent).toLocaleString()}</span>{t("offers.perMonth")}</p>
+                <p className="text-muted-foreground">{t("offers.depositLabel")}: <span className="text-foreground font-semibold">TZS {Number(securityDeposit).toLocaleString()}</span></p>
+                <p className="text-muted-foreground">{t("offers.from")}: <span className="text-foreground font-semibold">{format(moveInDate, "dd MMM yyyy")}</span></p>
+                <p className="text-muted-foreground">{t("offers.duration")}: <span className="text-foreground font-semibold">{LEASE_DURATIONS.find(d => d.value === leaseDuration)?.label}</span></p>
                 {leaseDuration !== "open" && calculateEndDate() && (
-                  <p className="text-muted-foreground">Hadi: <span className="text-foreground font-semibold">{format(new Date(calculateEndDate()), "dd MMM yyyy")}</span></p>
+                  <p className="text-muted-foreground">{t("offers.until")}: <span className="text-foreground font-semibold">{format(new Date(calculateEndDate()), "dd MMM yyyy")}</span></p>
                 )}
               </div>
             )}
 
-            {/* Note */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Ujumbe kwa Mpangaji (Hiari)</Label>
+              <Label className="text-xs text-muted-foreground">{t("offers.noteToTenant")}</Label>
               <Textarea
-                placeholder="Masharti ya ziada, maelezo..."
+                placeholder={t("offers.notePlaceholder")}
                 value={landlordNote}
                 onChange={(e) => setLandlordNote(e.target.value)}
                 className="rounded resize-none"
@@ -251,13 +246,13 @@ const LandlordOffers = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={resetForm} className="rounded">Ghairi</Button>
+            <Button variant="outline" onClick={resetForm} className="rounded">{t("offers.cancel")}</Button>
             <Button
               onClick={() => createMutation.mutate()}
               disabled={createMutation.isPending || !applicationId || !viewingId || !monthlyRent || !securityDeposit || !moveInDate || !leaseDuration}
               className="rounded"
             >
-              {createMutation.isPending ? "Inatuma..." : "Tuma Ofa"}
+              {createMutation.isPending ? t("offers.sending") : t("offers.sendBtn")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -268,7 +263,7 @@ const LandlordOffers = () => {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <FileText className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-            Ofa Zilizotumwa
+            {t("offers.sentOffers")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -279,34 +274,34 @@ const LandlordOffers = () => {
               <div key={offer.id} className="border border-border rounded-lg p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-foreground">{offer.property_title || `Nyumba #${offer.property}`}</p>
-                    <p className="text-xs text-muted-foreground">Mpangaji: {offer.tenant_name || offer.tenant}</p>
+                    <p className="font-semibold text-foreground">{offer.property_title || `#${offer.property}`}</p>
+                    <p className="text-xs text-muted-foreground">{t("offers.tenant")}: {offer.tenant_name || offer.tenant}</p>
                   </div>
                   <Badge variant={getStatusColor(offer.status)}>{getStatusLabel(offer.status)}</Badge>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <span>Kodi:</span>
+                    <span>{t("offers.rent")}:</span>
                     <span className="text-foreground font-medium">TZS {Number(offer.monthly_rent || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <span>Amana:</span>
+                    <span>{t("offers.depositLabel")}:</span>
                     <span className="text-foreground font-medium">TZS {Number(offer.security_deposit || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <span>Kuanzia:</span>
+                    <span>{t("offers.from")}:</span>
                     <span className="text-foreground font-medium">{offer.start_date || "—"}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <span>Hadi:</span>
-                    <span className="text-foreground font-medium">{offer.end_date || "Wazi"}</span>
+                    <span>{t("offers.until")}:</span>
+                    <span className="text-foreground font-medium">{offer.end_date || t("offers.open")}</span>
                   </div>
                 </div>
 
                 {offer.tenant_note && (
                   <div className="bg-muted/50 rounded p-2 text-sm">
-                    <p className="text-xs text-muted-foreground mb-0.5">Jibu la Mpangaji:</p>
+                    <p className="text-xs text-muted-foreground mb-0.5">{t("offers.tenantReply")}:</p>
                     <p className="text-foreground">{offer.tenant_note}</p>
                   </div>
                 )}
@@ -314,10 +309,10 @@ const LandlordOffers = () => {
                 {offer.status === "sent" && (
                   <div className="flex items-center gap-2 pt-1">
                     <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Inasubiri jibu la mpangaji</span>
+                    <span className="text-xs text-muted-foreground">{t("offers.awaitingReply")}</span>
                     <Button size="sm" variant="ghost" className="ml-auto text-destructive text-xs" onClick={() => withdrawMutation.mutate(String(offer.id))}>
                       <XCircle className="h-3 w-3 mr-1" />
-                      Ondoa
+                      {t("offers.withdraw")}
                     </Button>
                   </div>
                 )}
@@ -325,7 +320,7 @@ const LandlordOffers = () => {
                 {offer.status === "accepted" && (
                   <div className="flex items-center gap-2 pt-1 text-xs text-primary">
                     <CheckCircle2 className="h-3.5 w-3.5" />
-                    Imekubaliwa — Mkataba unaandaliwa
+                    {t("offers.acceptedLease")}
                   </div>
                 )}
               </div>
@@ -333,9 +328,9 @@ const LandlordOffers = () => {
           ) : (
             <div className="text-center py-12">
               <Send className="h-8 w-8 text-muted-foreground mx-auto mb-3" strokeWidth={1} />
-              <p className="text-sm text-muted-foreground">Bado hujatuma ofa yoyote.</p>
+              <p className="text-sm text-muted-foreground">{t("offers.noOffersSent")}</p>
               <Button variant="outline" size="sm" onClick={() => setShowForm(true)} className="mt-3 rounded">
-                Tuma Ofa ya Kwanza
+                {t("offers.sendFirst")}
               </Button>
             </div>
           )}
